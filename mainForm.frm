@@ -33,7 +33,7 @@ Begin VB.Form mainForm
       Height          =   320
       Left            =   1410
       TabIndex        =   8
-      Text            =   "5"
+      Text            =   "2"
       Top             =   2670
       Width           =   1380
    End
@@ -41,7 +41,7 @@ Begin VB.Form mainForm
       Height          =   400
       Left            =   1420
       TabIndex        =   5
-      Text            =   "2000"
+      Text            =   "300"
       Top             =   2140
       Width           =   1260
    End
