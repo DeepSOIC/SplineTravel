@@ -1,0 +1,1 @@
+This is an experimental project to make 3d printer travel moves not in a straight lines, but using Bezier curves, to avoid printhead from coming to a complete stop before traveling. This may also produce very cool-looking printing process, and reduce shaking.
