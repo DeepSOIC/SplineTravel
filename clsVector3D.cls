@@ -62,3 +62,17 @@ Else
   Set normalized = ret
 End If
 End Function
+
+Public Sub Round()
+Me.X = VBA.Round(Me.X, mdlCommon.posDecimals)
+Me.Y = VBA.Round(Me.Y, mdlCommon.posDecimals)
+Me.Z = VBA.Round(Me.Z, mdlCommon.posDecimals)
+End Sub
+
+Public Function Copy() As clsVector3D
+Dim ret As New clsVector3D
+ret.X = Me.X
+ret.Y = Me.Y
+ret.Z = Me.Z
+Set Copy = ret
+End Function
