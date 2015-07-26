@@ -10,9 +10,17 @@ Public Type typCurrentState
   ExtrusionRelative As Boolean
 End Type
 
+Public Type typVector3D
+  X As Double
+  Y As Double
+  Z As Double
+End Type
+
 Public posDecimals As Integer
 Public extrDecimals As Integer
 
 Function vtStr(val As Double) As String
 vtStr = Trim(Str(val))
 End Function
+
+

@@ -13,9 +13,15 @@ Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 Option Explicit
 
-Public X
-Public Y
-Public Z
+Public X As Double
+Public Y As Double
+Public Z As Double
+
+Friend Sub Fill(vec As typVector3D)
+Me.X = vec.X
+Me.Y = vec.Y
+Me.Z = vec.Z
+End Sub
 
 Public Function Length() As Double
 Length = Sqr(X ^ 2 + Y ^ 2 + Z ^ 2)
@@ -45,6 +51,12 @@ ret.Z = Me.Z + multiplier
 Set Multed = ret
 End Function
 
+Public Sub Mult(multiplier As Double)
+Me.X = Me.X * multiplier
+Me.Y = Me.Y * multiplier
+Me.Z = Me.Z * multiplier
+End Sub
+
 Public Function dot(other As clsVector3D) As Double
 dot = Me.X * other.X + Me.Y * other.Y + Me.Z * other.Z
 End Function
@@ -71,8 +83,13 @@ End Sub
 
 Public Function Copy() As clsVector3D
 Dim ret As New clsVector3D
-ret.X = Me.X
-ret.Y = Me.Y
-ret.Z = Me.Z
+ret.copyFrom Me
 Set Copy = ret
 End Function
+
+Public Sub copyFrom(vecFrom As clsVector3D)
+Me.X = vecFrom.X
+Me.Y = vecFrom.Y
+Me.Z = vecFrom.Z
+End Sub
+
