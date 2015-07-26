@@ -15,8 +15,14 @@ Private nInStack As Long
 
 
 Public Enum eErrors
- errZeroTimeMove = 12345
- errCancel = 32755
+  'project-specific errors
+  errZeroTimeMove = 12345
+  errTooSlow = 12346
+  errClassNotInitialized = 12347
+  
+  'standard errors
+  errCancel = 32755
+  errIndexOutOfRange = 9
 End Enum
 
 Public Sub Throw(Optional er As eErrors = 0, Optional Source As String, Optional extraMessage As String)
@@ -27,10 +33,23 @@ End If
 
 Dim Message As String
 Select Case er
-Case errZeroTimeMove
-  Message = "Zero time move"
-Case errCancel
-  Message = "Canceled by user"
+  'project-specific errors
+  Case errZeroTimeMove
+    Message = "Zero time move"
+  Case errTooSlow
+    Message = "Too slow, it doesn't make sense to fit a spline"
+  Case errClassNotInitialized
+    Message = "Class is not initialized properly"
+  
+  'standard errors
+  Case errCancel
+    Message = "Canceled by user"
+  Case Else
+    'hack - obtain standard error message.
+    On Error Resume Next
+    Err.Raise er
+    Message = Err.Description
+    On Error GoTo 0
 End Select
 
 If Len(extraMessage) > 0 Then
