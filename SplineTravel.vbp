@@ -8,6 +8,7 @@ Class=clsGMove; clsGMove.cls
 Module=mdlErrors; mdlErrors.bas
 Class=clsBezier; clsBezier.cls
 Class=clsGCommand; clsGCommand.cls
+Class=clsChain; clsChain.cls
 IconForm="mainForm"
 Startup="mainForm"
 Command32=""
