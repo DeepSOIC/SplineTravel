@@ -5,7 +5,7 @@ Const DisableAssertions As Boolean = True
 
 Public Type vtError
     Number As Long
-    Source As String
+    source As String
     Description As String
 End Type
 
@@ -19,13 +19,18 @@ Public Enum eErrors
   errZeroTimeMove = 12345
   errTooSlow = 12346
   errClassNotInitialized = 12347
+  errInvalidCommand = 12348
+  errNotInChain = 12349
+  errAlreadyInChain = 12350
+  errVerificationFailed = 12351
   
   'standard errors
   errCancel = 32755
   errIndexOutOfRange = 9
+  errInvalidArgument = 5
 End Enum
 
-Public Sub Throw(Optional er As eErrors = 0, Optional Source As String, Optional extraMessage As String)
+Public Sub Throw(Optional er As eErrors = 0, Optional source As String, Optional extraMessage As String)
 If er = 0 Then
   'analog of C++ throw, re-raise the handled error
   ErrRaise
@@ -40,7 +45,15 @@ Select Case er
     Message = "Too slow, it doesn't make sense to fit a spline"
   Case errClassNotInitialized
     Message = "Class is not initialized properly"
-  
+  Case errInvalidCommand
+    Message = "G-Command is invalid"
+  Case errNotInChain
+    Message = "Command is not in chain"
+  Case errAlreadyInChain
+    Message = "Command is already in a chain"
+  Case errVerificationFailed
+    Message = ""
+    
   'standard errors
   Case errCancel
     Message = "Canceled by user"
@@ -55,13 +68,13 @@ End Select
 If Len(extraMessage) > 0 Then
   Message = Message + ", " + extraMessage
 End If
-Err.Raise er, Source, Message
+Err.Raise er, source, Message
 End Sub
 
 
 Public Sub ReadError_Arg(ByRef vErr As vtError)
 vErr.Number = Err.Number
-vErr.Source = Err.Source
+vErr.source = Err.source
 vErr.Description = Err.Description
 End Sub
 
@@ -78,13 +91,13 @@ If Len(ProjectName) = 0 Then
 End If
 Debug.Assert aErr.Number = eErrors.errCancel Or DisableAssertions
 If Len(ProcedureName) > 0 Then
-    If aErr.Source = ProjectName Then
+    If aErr.source = ProjectName Then
         Err.Raise aErr.Number, ProcedureName, aErr.Description
     Else
-        Err.Raise aErr.Number, aErr.Source, aErr.Description
+        Err.Raise aErr.Number, aErr.source, aErr.Description
     End If
 Else
-    Err.Raise aErr.Number, aErr.Source, aErr.Description
+    Err.Raise aErr.Number, aErr.source, aErr.Description
 End If
 End Sub
 
@@ -94,7 +107,7 @@ PushError
 'hack.
 On Error Resume Next
 Err.Raise 5
-ProjectName = Err.Source
+ProjectName = Err.source
 
 PopError
 End Function
@@ -167,7 +180,7 @@ Else
     Erase ErrorStack
 End If
 If Not RaiseIt Then On Error Resume Next
-Err.Raise vErr.Number, vErr.Source, vErr.Description
+Err.Raise vErr.Number, vErr.source, vErr.Description
 End Sub
 
 'puts the error into the global Err object, but doesn't raise it
