@@ -16,10 +16,10 @@ Begin VB.Form mainForm
       Caption         =   "Go"
       CausesValidation=   0   'False
       Height          =   840
-      Left            =   5210
+      Left            =   3190
       TabIndex        =   13
       Top             =   3290
-      Width           =   1890
+      Width           =   5150
    End
    Begin VB.TextBox Text3 
       Height          =   400
@@ -133,3 +133,43 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
+Private Sub cmdProcessFile_Click()
+Dim f1 As Long
+f1 = FreeFile
+Dim chain As New clsChain
+Dim iline As Long
+Open Me.txtFNIn For Input As f1
+  On Error GoTo eh
+  Dim ln As String
+  Do While Not EOF(f1)
+    Line Input #(f1), ln
+    chain.Add New clsGCommand
+    chain.last.strLine = ln
+    chain.last.ParseString
+    chain.last.RecomputeStates
+    iline = iline + 1
+    If timeToDoEvents Then
+      Me.cmdProcessFile.Caption = "processing line " + Str(iline)
+      DoEvents
+    End If
+  Loop
+Close f1
+MsgBox "file loaded, " + CStr(iline) + " lines of text"
+chain.delete
+
+Exit Sub
+eh:
+PushError
+Close f1
+PopError
+MsgError
+chain.delete
+End Sub
+
+Public Function timeToDoEvents()
+Static lastDidTime As Double
+If Abs(Timer - lastDidTime) > 0.3 Then
+  timeToDoEvents = True
+  lastDidTime = Timer
+End If
+End Function
