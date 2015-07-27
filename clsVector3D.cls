@@ -93,3 +93,9 @@ Me.Y = vecFrom.Y
 Me.Z = vecFrom.Z
 End Sub
 
+Friend Sub copyFromT(vecFrom As typVector3D)
+Me.X = vecFrom.X
+Me.Y = vecFrom.Y
+Me.Z = vecFrom.Z
+End Sub
+
