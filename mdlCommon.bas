@@ -3,17 +3,19 @@ Option Explicit
 
 Public Const Pi As Double = 3.14159265358979
 
-Public Type typCurrentState
-  Speed As Double
-  Epos As Double 'extrusion accumulator
-  MoveRelative As Boolean
-  ExtrusionRelative As Boolean
-End Type
 
 Public Type typVector3D
   X As Double
   Y As Double
   Z As Double
+End Type
+
+Public Type typCurrentState
+  Speed As Double
+  pos As typVector3D
+  Epos As Double 'extrusion accumulator
+  MoveRelative As Boolean
+  ExtrusionRelative As Boolean
 End Type
 
 Public posDecimals As Integer
