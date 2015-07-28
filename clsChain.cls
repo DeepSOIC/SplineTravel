@@ -41,7 +41,7 @@ If Before Is Nothing And After Is Nothing Then Set After = myLast
 If Before Is Nothing And Not After Is Nothing Then
   Set Before = After.nextCommand
 ElseIf After Is Nothing And Not Before Is Nothing Then
-  Set After = Before.nextCommand
+  Set After = Before.prevCommand
 End If
 
 CheckInChain Before, "clsChain.Add", extraMessage:="can't use it as a place to insert before"
@@ -117,7 +117,6 @@ End Sub
 Private Function changeTrainChain(cmdFirst As clsGCommand, cmdLast As clsGCommand, newChainRef As clsChain) As Long
 Dim cnt As Long
 Dim cmd As clsGCommand
-If mySize = 0 Then Exit Function
 Set cmd = cmdFirst
 Do
   Set cmd.inChain = newChainRef
@@ -125,6 +124,7 @@ Do
   If cmd Is cmdLast Then Exit Do
   Set cmd = cmd.nextCommand
 Loop
+changeTrainChain = cnt
 End Function
 
 Public Property Get size() As Long
@@ -165,7 +165,7 @@ Set myFirst = Nothing
 Set myLast = Nothing
 mySize = 0
 
-autoVerify "delete"
+'autoVerify "delete"
 End Sub
 
 'tolerant to empty values
@@ -240,7 +240,7 @@ mySize = mySize - chain.size
 
 Set withdrawChain = chain
 
-autoVerify "withdrawChain"
+'autoVerify "withdrawChain"
 End Function
 
 Friend Sub wrap(cmdFirst As clsGCommand, cmdLast As clsGCommand)
@@ -265,6 +265,7 @@ If mySize = 0 Then
     Debug.Print "List size is zero, but it has pointers to first or last"
     valid = False
   End If
+  verify = valid
   Exit Function
 Else
   If Me.first Is Nothing Or Me.last Is Nothing Then
