@@ -20,6 +20,7 @@ End Type
 
 Public posDecimals As Integer
 Public extrDecimals As Integer
+Public speedDecimals As Integer
 
 Function vtStr(val As Double) As String
 vtStr = Trim(Str(val))
