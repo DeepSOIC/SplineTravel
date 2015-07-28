@@ -141,6 +141,23 @@ Friend Property Get CompleteStateAfter() As typCurrentState
 CompleteStateAfter = stateAfter
 End Property
 
+Friend Property Get CompleteStateBefore() As typCurrentState
+CompleteStateBefore = stateBefore
+End Property
+
+Public Function getEnterSpeed() As clsVector3D
+'FIXME: support arcs
+Set getEnterSpeed = _
+  makeClsVector(stateAfter.pos) _
+  .Subtrd(makeClsVector(stateBefore.pos)) _
+  .normalized.Multed(stateAfter.Speed)
+End Function
+
+Public Function getExitSpeed() As clsVector3D
+'FIXME: support arcs
+Set getExitSpeed = getEnterSpeed
+End Function
+
 Public Sub ParseString(Optional ByVal throwIfInvalid = False)
 Erase arguments
 myCmdType = 0
@@ -226,7 +243,7 @@ myMove.p1.copyFromT stateBefore.pos
 myMove.p2.copyFromT stateAfter.pos
 myMove.Extrusion = stateAfter.Epos - stateBefore.Epos
 
-If myMove.TravelDist > 1E-100 Then
+If myMove.traveldist > 1E-100 Then
   myMove.Speed = stateAfter.Speed
 ElseIf Abs(myMove.Extrusion) > 1E-100 Then
   myMove.ExtrusionSpeed = stateAfter.Speed
@@ -280,3 +297,85 @@ End Property
 '  Set cmd = cmd.nextCommand
 'Loop
 'End Sub
+
+'also true for hop moves
+Public Property Get isTravelMove() As Boolean
+If Not isMove Then
+  isTravelMove = False
+  Exit Property
+End If
+Dim traveldist As Double
+traveldist = mdlCommon.dist(stateBefore.pos, stateAfter.pos)
+If traveldist < 1E-100 Then
+  isTravelMove = False
+  Exit Function
+End If
+If Abs(stateAfter.Epos - stateBefore.Epos) > 1E-100 Then
+  isTravelMove = False
+  Exit Function
+End If
+isTravelMove = True
+End Property
+
+Public Property Get isExtruderMove() As Boolean
+If Not isMove Then
+  isExtruderMove = False
+  Exit Property
+End If
+Dim traveldist As Double
+traveldist = mdlCommon.dist(stateBefore.pos, stateAfter.pos)
+If traveldist > 1E-100 Then
+  isExtruderMove = False
+  Exit Property
+End If
+If Abs(stateAfter.Epos - stateBefore.Epos) < 1E-100 Then
+  isExtruderMove = False
+  Exit Property
+End If
+isExtruderMove = True
+End Property
+
+'note: if there is a position change too, this is still a retract.
+'If you want to filter that out, check for isExtruderMove
+Public Property Get isRetract() As Boolean
+If Not isMove Then 'FIXME: support retract G-command
+  isRetract = False
+  Exit Property
+End If
+If stateAfter.Epos - stateBefore.Epos > -1E-100 Then
+  isRetract = False
+  Exit Property
+End If
+isRetract = True
+End Property
+
+'returns true if the move includes positive extusion and some motion.
+Public Property Get isBuildMove() As Boolean
+If Not isMove Then
+  isBuildMove = False
+  Exit Property
+End If
+Dim traveldist As Double
+traveldist = mdlCommon.dist(stateBefore.pos, stateAfter.pos)
+If traveldist < 1E-100 Then
+  isBuildMove = False
+  Exit Property
+End If
+If stateAfter.Epos - stateBefore.Epos < 1E-100 Then
+  isBuildMove = False
+  Exit Property
+End If
+isBuildMove = True
+End Property
+
+Public Property Get Echange() As Double
+Echange = stateAfter.Epos - stateBefore.Epos
+End Property
+
+Public Property Get PosChange() As clsVector3D
+Set PosChange = makeClsVector(stateAfter.pos).Subtrd(makeClsVector(stateBefore.pos))
+End Property
+
+Public Property Get ZChange() As Double
+ZChange = stateAfter.pos.Z - stateBefore.pos.Z
+End Property
