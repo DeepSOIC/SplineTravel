@@ -50,45 +50,45 @@ End If
 Dim stopDist As Double 'the path length required to stop moving, we are going to use it for computing starting values
 stopDist = Me.accelleration * (spd / Me.accelleration) ^ 2 / 2#
 
-bz.Pole(0).copyFrom (Me.p1)
-bz.Pole(3).copyFrom (Me.p2)
+bz.Pole(0).copyFrom Me.p1
+bz.Pole(3).copyFrom Me.p2
 
-Dim time As Double 'time it is to take to move through the whole spline
+Dim Time As Double 'time it is to take to move through the whole spline
 Dim timeOfSolved As Double
 
-time = stopDist / spd
-time = time / 10 'start iteratons from very abrupt spline
+Time = stopDist / spd
+Time = Time / 10 'start iteratons from very abrupt spline
 Dim logFactor As Double
 logFactor = 0.25 'sets, how fast to smooth out the spline (by increasing time) on each iteration
 Dim i As Long
 For i = 1 To iterCount
-  bz.Pole(1).copyFrom Me.p1.Added(Me.inSpeed.Multed(time))
-  bz.Pole(2).copyFrom Me.p2.Added(Me.outSpeed.Multed(-time))
+  bz.Pole(1).copyFrom Me.p1.Added(Me.inSpeed.Multed(Time / 3))
+  bz.Pole(2).copyFrom Me.p2.Added(Me.outSpeed.Multed(-Time / 3))
   'test if the spline has enter and exit speeds correct (assert)
   Dim vin As clsVector3D
   Dim vout As clsVector3D
   bz.getDeriv 0, vin
   bz.getDeriv 1, vout
-  vin.Mult 1 / time
-  vout.Mult 1 / time
-  Debug.Assert (vin.Subtrd(Me.inSpeed).Length < spd * 0.000000000001)
-  Debug.Assert (vout.Subtrd(Me.outSpeed).Length < spd * 0.000000000001)
+  vin.Mult 1 / Time
+  vout.Mult 1 / Time
+  Debug.Assert (vin.Subtrd(Me.inSpeed).Length < spd * 0.00000000001)
+  Debug.Assert (vout.Subtrd(Me.outSpeed).Length < spd * 0.00000000001)
   
   'calculate max accelleration; test if this spline is smooth enough already
   Dim acc1 As clsVector3D
   Dim acc2 As clsVector3D
   bz.getDeriv2 0, acc1
   bz.getDeriv2 0, acc2
-  acc1.Mult 1 / time ^ 2
-  acc2.Mult 1 / time ^ 2
+  acc1.Mult 1 / Time ^ 2
+  acc2.Mult 1 / Time ^ 2
   If maxD(acc1.Length, acc2.Length) <= Me.accelleration Then
     'valid spline. roll back and try again with finer stepping
-    timeOfSolved = time
-    time = time * Exp(-logFactor)
+    timeOfSolved = Time
+    Time = Time * Exp(-logFactor)
     logFactor = logFactor / 2
   Else
     'incease time, thus increasing smoothness
-    time = time * Exp(logFactor)
+    Time = Time * Exp(logFactor)
   End If
 Next i
 
@@ -107,7 +107,7 @@ Public Sub GenerateMoveTrainForBezier(ByRef arrMoves() As clsGMove, bz As clsBez
 'a few checks
 If Me.CurveJerk <= 1E-100 Then Throw errClassNotInitialized, extraMessage:="CurveJerk value is zero, can't compute step"
 
-Dim nmoves As Long
+Dim nMoves As Long
 Dim nalloc As Long
 Erase arrMoves
 nalloc = 10
@@ -143,18 +143,28 @@ Do
   GoSub addMove
   curMove.p1.copyFrom prevPos
   bz.getValue cur_t, curMove.p2
-  curMove.time = timestep
-Loop
+  curMove.Time = timestep
+  If curMove.Speed > Me.speedLimit Then curMove.Speed = speedLimit
+Loop Until cur_t >= 1#
+
+ReDim Preserve arrMoves(0 To nMoves - 1)
 
 Exit Sub
 'creates a new g-move, adds it to the array, and leaves it avalable for filling in curMove
 addMove:
   Set curMove = New clsGMove
-  nmoves = nmoves + 1
-  If nmoves > nalloc Then
+  nMoves = nMoves + 1
+  If nMoves > nalloc Then
     nalloc = nalloc * 1.5
     ReDim Preserve arrMoves(0 To nalloc - 1)
   End If
-  Set arrMoves(nmoves - 1) = curMove
+  Set arrMoves(nMoves - 1) = curMove
 Return
+End Sub
+
+Private Sub Class_Initialize()
+Set Me.p1 = New clsVector3D
+Set Me.p2 = New clsVector3D
+Set Me.inSpeed = New clsVector3D
+Set Me.outSpeed = New clsVector3D
 End Sub
