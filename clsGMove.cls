@@ -15,7 +15,7 @@ Option Explicit
 
 Public p1 As clsVector3D
 Public p2 As clsVector3D
-Public Time As Double 'mm/s
+Public time As Double 'mm/s
 Public Extrusion As Double 'in raw filament length, or whatever was printed to the G-code being processed. Positive for extrusion, negative for retraction.
 
 Public PreviousMoveRef As clsGMove
@@ -26,8 +26,8 @@ traveldist = p1.Subtrd(p2).Length
 End Property
 
 Public Property Get Speed() As Double
-If Me.Time > 1E-100 Then
-  Speed = Me.traveldist / Me.Time
+If Me.time > 1E-100 Then
+  Speed = Me.traveldist / Me.time
 Else
   Throw errZeroTimeMove, extraMessage:="can't get the speed"
 End If
@@ -36,7 +36,7 @@ End Property
 'changes the time, and consequently, extrusion speed
 Public Property Let Speed(ByVal newSpeed As Double)
 If Me.traveldist > 1E-100 Then
-  Me.Time = Me.traveldist / newSpeed
+  Me.time = Me.traveldist / newSpeed
 Else
   Throw errZeroTimeMove, extraMessage:="Can't set the speed for zero-distance move"
 End If
@@ -44,7 +44,7 @@ End Property
 
 Public Function isValid(Optional ByVal throwIfInvalid As Boolean) As Boolean
 Dim ret As Boolean: ret = True
-If Time < 1E-100 Then
+If time < 1E-100 Then
   ret = False
   If throwIfInvalid Then Throw errZeroTimeMove, extraMessage:="time is zero or negative, move is invalid"
 End If
@@ -60,8 +60,8 @@ isValid throwIfInvalid:=True
 isPause = Me.traveldist < 1E-100 And Abs(Me.Extrusion) < 1E-100
 End Function
 
-
-Friend Function GenerateGCode(CurrentState As typCurrentState) As String
+'EError is an error tracker for relative extrusion output. It outputs the error caused by rounding, as well as is an input (will be added to the extrusion).
+Friend Function GenerateGCode(CurrentState As typCurrentState, Optional ByRef EError As Double) As String
 Dim outStr As String
 Me.isValid throwIfInvalid:=True
 If Not Me.isPause Then
@@ -87,16 +87,17 @@ If Not Me.isPause Then
     outStr = outStr + " Z" + vtStr(wr.Z)
   End If
   
-  If Time > 0 Then
+  If time > 0 Then
     If Abs(Me.Speed - CurrentState.Speed) > 0.001 Then
       outStr = outStr + " F" + vtStr(Round(Me.Speed * 60, mdlCommon.speedDecimals))
     End If
   End If
   'write extrusion change
-  If Me.Extrusion > 1E-100 Then
+  If Abs(Me.Extrusion) > 1E-100 Then
     Dim wrE As Double
     If CurrentState.ExtrusionRelative Then
-      wrE = Me.Extrusion
+      wrE = Me.Extrusion + EError
+      EError = wrE - Round(wrE, mdlCommon.extrDecimals)
     Else
       'absolute E values
       wrE = CurrentState.Epos + Me.Extrusion
@@ -111,13 +112,13 @@ If Not Me.isPause Then
   
 Else
   'pause
-  GenerateGCode = "G4 P" + vtStr(Round(Me.Time * 1000))
+  GenerateGCode = "G4 P" + vtStr(Round(Me.time * 1000))
 End If
 End Function
 
 Public Property Get ExtrusionSpeed() As Double
-If Time > 1E-100 Then
-  ExtrusionSpeed = Abs(Extrusion) / Time
+If time > 1E-100 Then
+  ExtrusionSpeed = Abs(Extrusion) / time
 Else
   Throw errZeroTimeMove, extraMessage:="can't get the speed"
 End If
@@ -126,7 +127,7 @@ End Property
 'note: this will actually change time of the move, so it will change move speed too
 Public Property Let ExtrusionSpeed(ByVal newVal As Double)
 If Abs(Extrusion) Then
-  Time = Extrusion / newVal
+  time = Extrusion / newVal
 Else
   Throw errZeroTimeMove, extraMessage:="can't set the speed for zero-length extrusion"
 End If
