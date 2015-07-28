@@ -47,7 +47,7 @@ Public Function Multed(multiplier As Double) As clsVector3D
 Dim ret As New clsVector3D
 ret.X = Me.X * multiplier
 ret.Y = Me.Y * multiplier
-ret.Z = Me.Z + multiplier
+ret.Z = Me.Z * multiplier
 Set Multed = ret
 End Function
 
