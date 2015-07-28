@@ -2,48 +2,80 @@ VERSION 5.00
 Begin VB.Form mainForm 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "SplineTravel"
-   ClientHeight    =   4320
+   ClientHeight    =   5370
    ClientLeft      =   30
    ClientTop       =   370
    ClientWidth     =   9490
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   4320
+   ScaleHeight     =   5370
    ScaleWidth      =   9490
    StartUpPosition =   3  'Windows Default
+   Begin VB.TextBox txtEAccell 
+      Height          =   370
+      Left            =   5280
+      TabIndex        =   23
+      Text            =   "8000"
+      Top             =   3350
+      Width           =   1450
+   End
+   Begin VB.TextBox txtRetract 
+      Height          =   370
+      Left            =   5270
+      TabIndex        =   20
+      Text            =   "1.5"
+      Top             =   2760
+      Width           =   1450
+   End
+   Begin VB.TextBox txtEJerk 
+      Height          =   370
+      Left            =   5290
+      TabIndex        =   17
+      Text            =   "10"
+      Top             =   2120
+      Width           =   1450
+   End
+   Begin VB.TextBox txtZJerk 
+      Height          =   370
+      Left            =   5300
+      TabIndex        =   14
+      Text            =   "5"
+      Top             =   1450
+      Width           =   1450
+   End
    Begin VB.CommandButton cmdProcessFile 
       Caption         =   "Go"
       CausesValidation=   0   'False
       Height          =   840
-      Left            =   3650
+      Left            =   3870
       TabIndex        =   13
-      Top             =   3280
+      Top             =   4050
       Width           =   5150
    End
    Begin VB.TextBox txtSpeedLimit 
-      Height          =   400
-      Left            =   1440
+      Height          =   370
+      Left            =   1260
       TabIndex        =   11
       Text            =   "200"
-      Top             =   1520
-      Width           =   1260
+      Top             =   1500
+      Width           =   1450
    End
    Begin VB.TextBox txtCurveJerk 
-      Height          =   320
-      Left            =   1400
+      Height          =   370
+      Left            =   1260
       TabIndex        =   8
       Text            =   "2"
-      Top             =   2730
-      Width           =   1380
+      Top             =   2710
+      Width           =   1450
    End
    Begin VB.TextBox txtAccelleration 
-      Height          =   400
-      Left            =   1420
+      Height          =   370
+      Left            =   1260
       TabIndex        =   5
       Text            =   "300"
-      Top             =   2140
-      Width           =   1260
+      Top             =   2120
+      Width           =   1450
    End
    Begin VB.TextBox txtFNOut 
       Height          =   410
@@ -61,20 +93,76 @@ Begin VB.Form mainForm
       Top             =   50
       Width           =   5610
    End
-   Begin VB.Label Label9 
-      Caption         =   "Label9"
-      Height          =   390
-      Left            =   140
-      TabIndex        =   14
+   Begin VB.Label Label16 
+      Caption         =   "E accelleration"
+      Height          =   610
+      Left            =   4150
+      TabIndex        =   25
       Top             =   3420
-      Width           =   1040
+      Width           =   1070
    End
-   Begin VB.Label Label8 
+   Begin VB.Label Label15 
       Caption         =   "mm/s2"
       Height          =   240
-      Left            =   2830
+      Left            =   6830
+      TabIndex        =   24
+      Top             =   3420
+      Width           =   760
+   End
+   Begin VB.Label Label14 
+      Caption         =   "retract"
+      Height          =   610
+      Left            =   4170
+      TabIndex        =   22
+      Top             =   2800
+      Width           =   1070
+   End
+   Begin VB.Label Label13 
+      Caption         =   "mm"
+      Height          =   240
+      Left            =   6820
+      TabIndex        =   21
+      Top             =   2830
+      Width           =   760
+   End
+   Begin VB.Label Label12 
+      Caption         =   "E jerk (for retraction)"
+      Height          =   610
+      Left            =   4180
+      TabIndex        =   19
+      Top             =   2090
+      Width           =   1070
+   End
+   Begin VB.Label Label11 
+      Caption         =   "mm/s"
+      Height          =   240
+      Left            =   6840
+      TabIndex        =   18
+      Top             =   2190
+      Width           =   760
+   End
+   Begin VB.Label Label10 
+      Caption         =   "Z jerk (for hopping)"
+      Height          =   610
+      Left            =   4180
+      TabIndex        =   16
+      Top             =   1360
+      Width           =   1070
+   End
+   Begin VB.Label Label9 
+      Caption         =   "mm/s"
+      Height          =   240
+      Left            =   6850
+      TabIndex        =   15
+      Top             =   1520
+      Width           =   760
+   End
+   Begin VB.Label label8 
+      Caption         =   "mm/s2"
+      Height          =   240
+      Left            =   2810
       TabIndex        =   12
-      Top             =   1550
+      Top             =   1565
       Width           =   920
    End
    Begin VB.Label Label7 
@@ -82,15 +170,15 @@ Begin VB.Form mainForm
       Height          =   340
       Left            =   190
       TabIndex        =   10
-      Top             =   1570
+      Top             =   1515
       Width           =   1210
    End
    Begin VB.Label Label6 
       Caption         =   "mm/s"
       Height          =   240
-      Left            =   2920
+      Left            =   2810
       TabIndex        =   9
-      Top             =   2750
+      Top             =   2775
       Width           =   760
    End
    Begin VB.Label Label5 
@@ -98,7 +186,7 @@ Begin VB.Form mainForm
       Height          =   610
       Left            =   150
       TabIndex        =   7
-      Top             =   2560
+      Top             =   2590
       Width           =   1070
    End
    Begin VB.Label Label4 
@@ -106,7 +194,7 @@ Begin VB.Form mainForm
       Height          =   240
       Left            =   2810
       TabIndex        =   6
-      Top             =   2170
+      Top             =   2185
       Width           =   920
    End
    Begin VB.Label Label3 
@@ -114,7 +202,7 @@ Begin VB.Form mainForm
       Height          =   340
       Left            =   170
       TabIndex        =   4
-      Top             =   2190
+      Top             =   2135
       Width           =   1210
    End
    Begin VB.Label Label2 
@@ -230,20 +318,26 @@ For imove = 0 To nMoves - 1
     gen.accelleration = val(Me.txtAccelleration)
     gen.CurveJerk = val(Me.txtCurveJerk)
     gen.speedLimit = val(Me.txtSpeedLimit)
+    gen.Retract = val(Me.txtRetract)
+    gen.RetractAccelleration = val(Me.txtEAccell)
+    gen.RetractJerk = val(Me.txtEJerk)
+    gen.ZJerk = val(Me.txtZJerk)
   End If
   gen.p1.copyFromT mv.prevBuildMove.CompleteStateAfter.pos
   gen.p2.copyFromT mv.nextBuildMove.CompleteStateBefore.pos
   Set gen.inSpeed = mv.prevBuildMove.getExitSpeed
   Set gen.outSpeed = mv.nextBuildMove.getEnterSpeed
   Dim arrSegments() As clsGMove
-  Dim bz As clsBezier, moveTime As Double
-  Set bz = gen.FitBezier(moveTime)
-  gen.GenerateMoveTrainForBezier arrSegments, bz, moveTime
+  Dim bz As clsBezier, MoveTime As Double
+  Set bz = gen.FitBezier(MoveTime)
+  gen.GenerateMoveTrainForBezier arrSegments, bz, MoveTime
   Dim isegment As Long
   For isegment = 0 To UBound(arrSegments)
     Set cmd = New clsGCommand
     chain.Add cmd, Before:=mv.nextBuildMove
-    cmd.strLine = arrSegments(isegment).GenerateGCode(cmd.prevCommand.CompleteStateAfter)
+    Dim EError As Double
+    EError = 0
+    cmd.strLine = arrSegments(isegment).GenerateGCode(cmd.prevCommand.CompleteStateAfter, EError)
     cmd.ParseString throwIfInvalid:=True
     cmd.RecomputeStates
   Next isegment
@@ -295,3 +389,4 @@ mdlCommon.extrDecimals = 4
 mdlCommon.posDecimals = 3
 mdlCommon.speedDecimals = 3
 End Sub
+
