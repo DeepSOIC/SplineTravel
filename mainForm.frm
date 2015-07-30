@@ -296,8 +296,8 @@ Dim f1 As Long
 f1 = FreeFile
 Dim chain As New clsChain
 Dim iline As Long
-Open Me.txtFNIn For Input As f1
 On Error GoTo eh
+Open Me.txtFNIn For Input As f1
   Dim ln As String
   Do While Not EOF(f1)
     Line Input #(f1), ln
@@ -574,7 +574,13 @@ DoEvents
 
 For iGroup = 0 To nMoveGroups - 1
   moveGroups(iGroup).chain.delete
+  If timeToDoEvents Then
+    Me.cmdProcessFile.Caption = "freeing memory: move " + CStr(iGroup) + " of " + CStr(nMoveGroups)
+    DoEvents
+  End If
 Next iGroup
+
+Me.cmdProcessFile.Caption = "Done."
 
 Me.cmdProcessFile.Enabled = True
 Exit Sub
