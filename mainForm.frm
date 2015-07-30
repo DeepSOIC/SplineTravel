@@ -297,7 +297,7 @@ f1 = FreeFile
 Dim chain As New clsChain
 Dim iline As Long
 Open Me.txtFNIn For Input As f1
-  On Error GoTo eh
+On Error GoTo eh
   Dim ln As String
   Do While Not EOF(f1)
     Line Input #(f1), ln
@@ -330,7 +330,7 @@ Do
   Dim curCmdType As eChainType
   If cmd.isBuildMove Then
     curCmdType = ectBuildChain
-  ElseIf cmd.isTravelMove Then
+  ElseIf cmd.isTravelMove Or cmd.isExtruderMove Then
     curCmdType = ectTravelChain
   Else
     curCmdType = ectOther

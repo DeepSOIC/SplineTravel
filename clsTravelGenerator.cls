@@ -140,19 +140,24 @@ cur_t = 0
 Do
   'compute current accelleration and use it to derive t-step
   Dim acc As clsVector3D
-  Dim timestep1 As Double, timestep2 As Double  '1 = for spline, 2 - for retract
+  Dim timestep1 As Double, timestep2 As Double, timestep3 As Double '1,2 = for spline, 2 - for retract
   Dim timestep As Double
   bz.getDeriv2 cur_t, acc
   acc.Mult 1 / TimeOfMove ^ 2
   timestep1 = Me.CurveJerk / acc.Length
+  bz.getDeriv2 cur_t + timestep1 / TimeOfMove, acc
+  acc.Mult 1 / TimeOfMove ^ 2
+  timestep2 = Me.CurveJerk / acc.Length
+  timestep1 = (timestep1 + timestep2) / 2
+
   Dim accE As Double
   accE = Abs(rtr.getDeriv2(cur_t))
   If accE > 1E-100 Then
-    timestep2 = Me.RetractJerk / Abs(accE / TimeOfMove ^ 2)
+    timestep3 = Me.RetractJerk / Abs(accE / TimeOfMove ^ 2)
   Else
-    timestep2 = 1E+100
+    timestep3 = 1E+100
   End If
-  timestep = minD(timestep1, timestep2)
+  timestep = minD(timestep1, timestep3)
   
   'att t-step
   prev_t = cur_t
