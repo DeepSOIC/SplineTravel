@@ -12,6 +12,7 @@ Class=clsChain; clsChain.cls
 Class=clsRetractCurve; clsRetractCurve.cls
 IconForm="mainForm"
 Startup="mainForm"
+ExeName32="SplineTravel.exe"
 Command32=""
 Name="SplineTravel"
 HelpContextID="0"
