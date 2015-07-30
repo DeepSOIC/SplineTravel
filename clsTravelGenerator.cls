@@ -25,9 +25,11 @@ Public ZJerk As Double 'Generally, this sets how fast Z is lifted
 Public CurveJerk As Double 'The parameter that affects how good a curve is approximated with line segments
 Public ZHopHeight As Double 'may be smaller than this value, this is simply the maximum
 Public Retract As Double
+Public bRetract As Boolean, bUnretract As Boolean
 Public RetractJerk As Double
 Public RetractAccelleration As Double
 Public accelleration As Double
+
 
 Public Function FitBezier(ByRef moveTimeResult As Double) As clsBezier
 Const iterCount = 30
@@ -121,6 +123,8 @@ Dim rtr As New clsRetractCurve
 rtr.RetractLen = Me.Retract
 rtr.RetractA = Me.RetractAccelleration
 rtr.MoveTime = TimeOfMove
+rtr.bRetract = Me.bRetract
+rtr.bUnretract = Me.bUnretract
 
 Dim nMoves As Long
 Dim nalloc As Long
@@ -198,6 +202,8 @@ Set Me.p1 = New clsVector3D
 Set Me.p2 = New clsVector3D
 Set Me.inSpeed = New clsVector3D
 Set Me.outSpeed = New clsVector3D
+Me.bRetract = True
+Me.bUnretract = True
 End Sub
 
 Private Function minD(ByVal a As Double, ByVal b As Double) As Double

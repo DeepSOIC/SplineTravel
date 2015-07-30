@@ -22,6 +22,8 @@ Public posDecimals As Integer
 Public extrDecimals As Integer
 Public speedDecimals As Integer
 
+Public test As clsRetractCurve
+
 Function vtStr(val As Double) As String
 vtStr = Trim(Str(val))
 End Function

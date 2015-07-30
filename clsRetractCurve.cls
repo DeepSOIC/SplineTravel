@@ -15,9 +15,13 @@ Option Explicit
 
 Private Type typThis
   MoveTime As Double 'time of the whole travel move
-  RetractLen As Double 'amount to retract
-  RetractA As Double 'accelleration
-  RetractLenAct As Double 'actual possible retract length
+  RetractLenSetting As Double 'amount to retract (setting)
+  RetractLen As Double 'actual possible retract length
+  RetractASetting As Double 'accelleration - wanted
+  RetractA As Double 'accelleration - actual (can be increased in some cases)
+  
+  bRetract As Boolean 'set to false to suppress retraction, but keep unretraction
+  bUnretract As Boolean 'set to false to suppress unretraction, but keep retraction
 
   dt_acc As Double 'time it takes to accellerate to full retraction speed
   t_start1 As Double '=zero
@@ -53,29 +57,50 @@ invalidate
 End Property
 
 Public Property Get RetractLen() As Double
-RetractLen = this.RetractLen
+RetractLen = this.RetractLenSetting
 End Property
 
 Public Property Let RetractLen(ByVal newVal As Double)
-this.RetractLen = newVal
+this.RetractLenSetting = newVal
 invalidate
 End Property
 
+
+
 Private Sub recompute()
-this.dt_acc = Sqr(Abs(2 * (this.RetractLen / 2) / this.RetractA))
-If this.dt_acc * 4 > this.MoveTime Then
-  this.dt_acc = MoveTime / 4 'not enough time for full retract-unretract, shrink
-  this.RetractLenAct = this.RetractA * this.dt_acc ^ 2 '/2*2
+this.dt_acc = Sqr(Abs(2 * (this.RetractLenSetting / 2) / this.RetractA))
+If this.bRetract And this.bUnretract Then
+  If this.dt_acc * 4 > this.MoveTime Then
+    this.dt_acc = MoveTime / 4 'not enough time for full retract-unretract, shrink
+    this.RetractLen = this.RetractA * this.dt_acc ^ 2 '/2*2
+  Else
+    this.RetractLen = this.RetractLenSetting
+  End If
+ElseIf this.bRetract Or this.bUnretract Then
+  If this.dt_acc * 2 > this.MoveTime Then
+    this.dt_acc = MoveTime / 2 'not enough time to complete, increase accelleration.
+    this.RetractA = (this.RetractLenSetting / 2) / (this.MoveTime / 2) ^ 2
+    this.RetractLen = this.RetractLenSetting
+  Else
+    this.RetractLen = this.RetractLenSetting
+  End If
 Else
-  this.RetractLenAct = this.RetractLen
+  'disable everything by setting retractlength to zero
+  this.RetractLen = 0
+  'the rest will be done by shifting out time points, as follows...
 End If
+
+'retract time moments
 this.t_start1 = 0
+If Not this.bRetract Then this.t_start1 = this.t_start1 - 10 * this.MoveTime 'suppress retract by simply moving it away
 this.t_mid1 = this.t_start1 + this.dt_acc
 this.t_end1 = this.t_mid1 + this.dt_acc
+
+'unretract time moments
 this.t_end2 = this.MoveTime
+If Not this.bUnretract Then this.t_end2 = this.t_end2 + 10 * this.MoveTime 'suppress unretract by simply moving it away
 this.t_mid2 = this.t_end2 - this.dt_acc
 this.t_start2 = this.t_mid2 - this.dt_acc
-Debug.Assert this.t_end1 <= this.t_start2 + 0.000000000001
 this.invalidated = False
 End Sub
 
@@ -88,11 +113,11 @@ If time < this.t_start1 Then
 ElseIf time < this.t_mid1 Then
   v = this.RetractA * (time - this.t_start1) ^ 2 / 2
 ElseIf time < this.t_end1 Then
-  v = this.RetractLenAct - this.RetractA * (time - this.t_end1) ^ 2 / 2
+  If this.bRetract Then v = this.RetractLen - this.RetractA * (time - this.t_end1) ^ 2 / 2
 ElseIf time < this.t_start2 Then
-  v = this.RetractLenAct
+  v = this.RetractLen
 ElseIf time < this.t_mid2 Then
-  v = this.RetractLenAct - this.RetractA * (time - this.t_start2) ^ 2 / 2
+  v = this.RetractLen - this.RetractA * (time - this.t_start2) ^ 2 / 2
 ElseIf time < this.t_end2 Then
   v = this.RetractA * (time - this.t_end2) ^ 2 / 2
 Else
@@ -167,3 +192,35 @@ End If
 
 shrink_interval = ret
 End Function
+
+Private Sub Class_Initialize()
+'fill up some defaults
+this.bRetract = True
+this.bUnretract = True
+End Sub
+
+Public Property Get bRetract() As Boolean
+bRetract = this.bRetract
+End Property
+
+Public Property Let bRetract(ByVal newVal As Boolean)
+this.bRetract = newVal
+invalidate
+End Property
+
+Public Property Get bUnretract() As Boolean
+bUnretract = this.bUnretract
+End Property
+
+Public Property Let bUnretract(ByVal newVal As Boolean)
+this.bUnretract = newVal
+invalidate
+End Property
+
+''returns actual length of retraction (will be reduced
+'if full retract-unretract sequence doesn't fit into
+'the MoveTime)
+Public Property Get ActualRetract() As Double
+If this.invalidated Then recompute
+ActualRetract = this.RetractLen
+End Property

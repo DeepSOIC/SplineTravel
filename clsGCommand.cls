@@ -55,13 +55,13 @@ Dim arguments(65 To 90) As typLetVal '65 to 90 = A to Z
 'if preserveDeltaE is specified, current extrusion length as
 'derived from current difference in states, is preserved
 '(unless the command is G92)
-Public Sub RecomputeStates(Optional ByVal preserveDeltaE = False)
+Public Sub RecomputeStates(Optional ByVal preserveDeltaE = False, Optional ByVal keepStateBefore As Boolean)
 
 'save current deltaE, we'll need it if preserveDeltaE = true
 Dim oldDeltaE As Double
 oldDeltaE = stateAfter.Epos - stateBefore.Epos
 
-If Not (refPrevCommand Is Nothing) Then
+If Not (refPrevCommand Is Nothing) And Not keepStateBefore Then
   stateBefore = refPrevCommand.CompleteStateAfter
 End If
 
@@ -104,6 +104,10 @@ If arg.specified Then
   End If
   If preserveDeltaE Then
     stateAfter.Epos = stateBefore.Epos + oldDeltaE
+    If Not stateBefore.ExtrusionRelative Then
+      'update E argument
+      arg.value = vtStr(Round(stateAfter.Epos, mdlCommon.extrDecimals))
+    End If
   End If
 End If
 
@@ -135,6 +139,20 @@ Select Case myCmdType
       stateAfter.pos.Z = arguments(Asc("Z")).value
     End If
 End Select
+End Sub
+
+Public Sub regenerateString()
+Me.strLine = ""
+If Me.isEmpty Then Exit Sub
+
+Me.strLine = Me.strLine + Chr$(myCmdType And &HFF&) + vtStr((myCmdType And &HFF00&) / &H100)
+
+Dim i As Long
+For i = LBound(arguments) To UBound(arguments)
+  If arguments(i).specified Then
+    Me.strLine = Me.strLine + " " + Chr$(i) + vtStr(arguments(i).value)
+  End If
+Next i
 End Sub
 
 Friend Property Get CompleteStateAfter() As typCurrentState
@@ -181,7 +199,7 @@ On Error GoTo eh
   
   If Len(lineText) = 0 Then Exit Sub
   Dim words() As String
-  words = Split(lineText, " ")
+  words = VBA.split(lineText, " ")
   Dim iword As Long
   For iword = 0 To UBound(words)
     If Len(words(iword)) > 0 Then 'this check is needed to deal with double spaces
@@ -230,7 +248,7 @@ Select Case myCmdType
 End Select
 End Sub
 
-Private Sub constructMove()
+Public Sub constructMove()
 If Not isMove Then
   Set myMove = Nothing
   Exit Sub
@@ -248,15 +266,24 @@ If myMove.traveldist > 1E-100 Then
 ElseIf Abs(myMove.Extrusion) > 1E-100 Then
   myMove.ExtrusionSpeed = stateAfter.Speed
 Else
-  'move is invalid
+  'move is invalid, it is probably a set speed command
   Set myMove = Nothing
 End If
 End Sub
 
-'to make sure the move is up-to-date, call constructMove before calling this
+'make sure to have called constructMove!
 Public Function getMove() As clsGMove
 Set getMove = myMove
 End Function
+
+'sets the move and updates the command
+'EError is rounding error tracker variable for extrusion values.
+'note: doesn't update states automatically!
+Public Sub setMove(ByVal newMove As clsGMove, Optional ByRef EError As Double)
+If Not Me.isMove And Not Me.isEmpty Then Throw errWrongType, "clsGCommand.setMove", "command """ + Me.strLine + """ is not a move command"
+Me.strLine = newMove.GenerateGCode(stateBefore, EError)
+Me.ParseString
+End Sub
 
 Public Property Get prevCommand() As clsGCommand
 Set prevCommand = refPrevCommand
@@ -379,3 +406,48 @@ End Property
 Public Property Get ZChange() As Double
 ZChange = stateAfter.pos.Z - stateBefore.pos.Z
 End Property
+
+'how much time it takes to execute the command?
+'(only valid for move commands; make sure to have called constructMove before using)
+'Returns the time assumming the move is done linearly with current feedrate.
+Public Property Get execTime() As Double
+If Not myMove Is Nothing Then
+  execTime = myMove.time
+End If
+End Property
+
+'make sure to have called constructMove
+Public Sub split(ByVal timePoint As Double, Optional ByRef EError As Double)
+Dim Part1 As clsGMove, Part2 As clsGMove
+If myMove.split(timePoint, Part1, Part2) Then
+  Dim cmd2 As New clsGCommand
+  Me.setMove Part1, EError
+  Me.RecomputeStates keepStateBefore:=True
+  cmd2.strLine = Part2.GenerateGCode(Me.CompleteStateAfter, EError)
+  cmd2.ParseString
+  Me.inChain.Add cmd2, After:=Me
+Else
+  Throw errInvalidArgument, extraMessage:="timePoint is not within 0..execTime, can't split"
+End If
+End Sub
+
+Public Function getPrevMove() As clsGCommand
+Dim cmd As clsGCommand
+Set cmd = Me
+Do
+  If cmd Is Me.inChain.first Then Set cmd = Nothing: Exit Do
+  Set cmd = cmd.prevCommand
+Loop Until cmd.isMove
+Set getPrevMove = cmd
+End Function
+
+Public Function getNextMove() As clsGCommand
+Dim cmd As clsGCommand
+Set cmd = Me
+Do
+  If cmd Is Me.inChain.last Then Set cmd = Nothing: Exit Do
+  Set cmd = cmd.nextCommand
+Loop Until cmd.isMove
+Set getNextMove = cmd
+End Function
+

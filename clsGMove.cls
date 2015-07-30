@@ -137,3 +137,28 @@ Private Sub Class_Initialize()
 Set Me.p1 = New clsVector3D
 Set Me.p2 = New clsVector3D
 End Sub
+
+Public Function split(ByVal timePoint As Double, ByRef Part1 As clsGMove, ByRef Part2 As clsGMove) As Boolean
+If timePoint <= 1E-100 Then
+  Set Part1 = Me
+  split = False
+ElseIf timePoint >= Me.time - 1E-100 Then
+  Set Part2 = Me
+  split = False
+Else
+  Set Part1 = New clsGMove
+  Set Part2 = New clsGMove
+  Part1.p1.copyFrom Me.p1
+  Dim s As Double, t As Double
+  t = timePoint / Me.time
+  s = 1 - t
+  Part1.p2.copyFrom Me.p1.Multed(s).Added(Me.p2.Multed(t))
+  Part1.Extrusion = t * Me.Extrusion
+  Part1.time = t * Me.time
+  Part2.p1.copyFrom Part1.p2
+  Part2.p2.copyFrom Me.p2
+  Part2.Extrusion = s * Me.Extrusion
+  Part2.time = s * Me.time
+  split = True
+End If
+End Function

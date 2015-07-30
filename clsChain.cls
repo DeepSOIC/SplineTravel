@@ -44,8 +44,16 @@ ElseIf After Is Nothing And Not Before Is Nothing Then
   Set After = Before.prevCommand
 End If
 
-CheckInChain Before, "clsChain.Add", extraMessage:="can't use it as a place to insert before"
-CheckInChain After, "clsChain.Add", extraMessage:="can't use it as a place to insert after"
+If Not After Is myLast Then
+  CheckInChain Before, "clsChain.Add", extraMessage:="can't use it as a place to insert before"
+Else
+  '"Before" is likely nothing, but may just be anything, because chain-to-chain links are allowed
+End If
+If Not Before Is myFirst Then
+  CheckInChain After, "clsChain.Add", extraMessage:="can't use it as a place to insert after"
+Else
+  '"After" is likely nothing, but may just be anything, because chain-to-chain links are allowed
+End If
 
 If Not (cmd.inChain Is Nothing) Then
   Throw errAlreadyInChain, extraMessage:="can't add it to another chain"
@@ -62,6 +70,7 @@ Else
   If cmd.nextCommand Is myFirst Then Set myFirst = cmd
   If cmd.prevCommand Is myLast Then Set myLast = cmd
   mySize = mySize + 1
+
 End If
 
 'autoVerify "Add"
@@ -169,11 +178,9 @@ mySize = 0
 End Sub
 
 'tolerant to empty values
-Private Sub MakeLink(cmd1 As clsGCommand, cmd2 As clsGCommand)
-If Not cmd1 Is Nothing Then
+Public Sub MakeLink(cmd1 As clsGCommand, cmd2 As clsGCommand)
+If Not cmd1 Is Nothing And Not cmd2 Is Nothing Then
   Set cmd1.nextCommand = cmd2
-End If
-If Not cmd2 Is Nothing Then
   Set cmd2.prevCommand = cmd1
 End If
 End Sub
@@ -201,8 +208,15 @@ CheckInChain cmd, "clsChain.withdraw", "can't withdraw"
 Dim prv As clsGCommand, nxt As clsGCommand
 Set prv = cmd.prevCommand
 Set nxt = cmd.nextCommand
-If cmd Is myFirst Then Set myFirst = cmd.nextCommand
-If cmd Is myLast Then Set myLast = cmd.prevCommand
+If cmd Is myFirst And cmd Is myLast Then
+  'the only element is being withdrawn
+  Set myFirst = Nothing
+  Set myLast = Nothing
+ElseIf cmd Is myFirst Then
+  Set myFirst = cmd.nextCommand
+ElseIf cmd Is myLast Then
+  Set myLast = cmd.prevCommand
+End If
 
 'break-before-make, otherwise break would corrupt the just-made link
 If Not keepRefs Then
@@ -223,10 +237,21 @@ Public Function withdrawChain(ByVal cmdFrom As clsGCommand, _
 CheckInChain cmdFrom, "clsChain.withdrawChain", "can't withdraw"
 CheckInChain cmdTo, "clsChain.withdrawChain", "can't withdraw"
 Dim prv As clsGCommand, nxt As clsGCommand
+Dim bMakeLink As Boolean: bMakeLink = False
 Set prv = cmdFrom.prevCommand
 Set nxt = cmdTo.nextCommand
-If cmdFrom Is myFirst Then Set myFirst = cmdTo.nextCommand
-If cmdTo Is myLast Then Set myLast = cmdFrom.prevCommand
+If cmdFrom Is myFirst And cmdTo Is myLast Then
+  'the whole chain is being withdrawn
+  Set myFirst = Nothing
+  Set myLast = Nothing
+ElseIf cmdFrom Is myFirst Then
+  Set myFirst = cmdTo.nextCommand
+ElseIf cmdTo Is myLast Then
+  Set myLast = cmdFrom.prevCommand
+Else
+  'withdrawing from the middle of the chain, need to make link to close the gap
+  bMakeLink = True
+End If
 
 Dim chain As New clsChain
 chain.wrap cmdFrom, cmdTo
@@ -234,7 +259,7 @@ If Not preserveLinks Then
   BreakLink_Prev cmdFrom
   BreakLink_Next cmdTo
 End If
-MakeLink prv, nxt
+If bMakeLink Then MakeLink prv, nxt
 
 mySize = mySize - chain.size
 

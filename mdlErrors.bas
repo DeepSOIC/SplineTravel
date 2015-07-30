@@ -28,6 +28,7 @@ Public Enum eErrors
   errCancel = 32755
   errIndexOutOfRange = 9
   errInvalidArgument = 5
+  errWrongType = 13
 End Enum
 
 Public Sub Throw(Optional er As eErrors = 0, Optional source As String, Optional extraMessage As String)
