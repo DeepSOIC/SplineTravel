@@ -484,13 +484,13 @@ If Me.chkSeamConceal.value = vbChecked Then
             Else
               'finalize retraction by generating a piece of current move to get the required amount
               Dim move2 As clsGMove, move3 As clsGMove
-              move.split t, move2, move3
+              move.split t + cmd.execTime, move2, move3
                             
               'add retract finalization command
               Set cmd2 = New clsGCommand
               moveGroups(iGroup).chain.Add cmd2, After:=moveGroups(iGroup).lastMoveRef
               Set moveGroups(iGroup).lastMoveRef = cmd2
-              move2.Extrusion = move2.time * retractSpeed
+              move2.Extrusion = -move2.time * retractSpeed
               cmd2.RecomputeStates
               cmd2.setMove move2, EError2
               cmd2.RecomputeStates
