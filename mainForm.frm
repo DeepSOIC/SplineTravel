@@ -268,6 +268,11 @@ Private Enum eChainType
   ectTravelChain = 2
 End Enum
 
+Private Enum eRetractBlenderState
+  rbsUnRetracting = 0
+  rbsRetracting = 1
+End Enum
+
 Private Type typMoveChain
   chain As clsChain
   chType As eChainType
@@ -409,46 +414,90 @@ If Me.chkSeamConceal.value = vbChecked Then
         Set cmd = moveGroups(iGroup).firstMoveRef
         Dim cmd2 As clsGCommand
         Dim chainRetract As clsChain
+        Dim state As eRetractBlenderState
+        state = rbsUnRetracting
         Do
           cmd.constructMove
           t = t - cmd.execTime
           Dim move As clsGMove
-          If Abs(t * retractSpeed) < 0.01 Or t > 0 Then
-            'unretraction either ends with this command, or takes up this command as a whole
-            
-            'modify the command, injecting unretraction
-            Set move = cmd.getMove
-            move.Extrusion = move.Extrusion + retractSpeed * move.time
-            cmd.setMove move, EError1
-            
-            'add copy of the command, for retraction
-            Set cmd2 = New clsGCommand
-            moveGroups(iGroup).chain.Add cmd2, After:=moveGroups(iGroup).lastMoveRef
-            Set moveGroups(iGroup).lastMoveRef = cmd2 'note: this may potentially cause mulpiple passes of the loop, if unretraction is not possible within one loop. This may be buggy. Disabling it requires serious refactor (prediction of the situation and preventing retraction injection beforehand).
-            move.Extrusion = -retractSpeed * move.time
-            cmd2.RecomputeStates
-            cmd2.setMove move, EError2
-            cmd2.RecomputeStates
-            
-            If Abs(t * retractSpeed) < 0.01 Then Exit Do 'slight under- or over-extrusion doesn't require a split
+          Set move = cmd.getMove
+          If state = rbsUnRetracting Then
+            If Abs(t * retractSpeed) < 0.01 Or t > 0 Then
+              'unretraction takes up this command as a whole (and may end with it)
+                                        
+              'add copy of the command to the end, for filling the empty piece created while unretracting
+              Set cmd2 = New clsGCommand
+              moveGroups(iGroup).chain.Add cmd2, After:=moveGroups(iGroup).lastMoveRef
+              Set moveGroups(iGroup).lastMoveRef = cmd2 'note: this may potentially cause mulpiple passes of the loop, if unretraction is not possible within one loop. This may be buggy. Disabling it requires serious refactor (prediction of the situation and preventing retraction injection beforehand).
+              cmd2.RecomputeStates
+              cmd2.setMove move, EError2
+              cmd2.RecomputeStates
+              
+              'modify the command, injecting unretraction
+              move.Extrusion = retractSpeed * move.time
+              cmd.setMove move, EError1
+              cmd.RecomputeStates
+              
+              If Abs(t * retractSpeed) < 0.01 Then
+                state = rbsRetracting 'slight under- or over-extrusion doesn't require a split
+                t = retractTime
+              End If
+            Else
+              cmd.split t + cmd.execTime, EError1
+              
+              cmd.constructMove 'need again, because split modified it
+              Set move = cmd.getMove
+              
+              'add copy of the command, for retraction
+              Set cmd2 = New clsGCommand
+              moveGroups(iGroup).chain.Add cmd2, After:=moveGroups(iGroup).lastMoveRef
+              Set moveGroups(iGroup).lastMoveRef = cmd2
+              cmd2.RecomputeStates
+              cmd2.setMove move, EError2
+              cmd2.RecomputeStates
+              
+              'modify the first part of splitting, injecting unretraction
+              move.Extrusion = retractSpeed * move.time
+              cmd.setMove move, EError1
+              cmd.RecomputeStates
+              
+              cmd.nextCommand.RecomputeStates 'recomputes the second part of split
+              
+              state = rbsRetracting
+              t = retractTime
+            End If
+          ElseIf state = rbsRetracting Then
+            'retracting
+            If Abs(t * retractSpeed) < 0.01 Or t > 0 Then
+              'retraction takes up this command as a whole (and may end with it)
+                                        
+              'add copy of the command to the end, changing extrusion to retraction
+              Set cmd2 = New clsGCommand
+              moveGroups(iGroup).chain.Add cmd2, After:=moveGroups(iGroup).lastMoveRef
+              Set moveGroups(iGroup).lastMoveRef = cmd2 'note: this may potentially cause mulpiple passes of the loop, if unretraction is not possible within one loop. This may be buggy. Disabling it requires serious refactor (prediction of the situation and preventing retraction injection beforehand).
+              move.Extrusion = -move.time * retractSpeed
+              cmd2.RecomputeStates
+              cmd2.setMove move, EError2
+              cmd2.RecomputeStates
+                            
+              If Abs(t * retractSpeed) < 0.01 Then Exit Do 'slight under- or over-extrusion doesn't require a split
+            Else
+              'finalize retraction by generating a piece of current move to get the required amount
+              Dim move2 As clsGMove, move3 As clsGMove
+              move.split t, move2, move3
+                            
+              'add retract finalization command
+              Set cmd2 = New clsGCommand
+              moveGroups(iGroup).chain.Add cmd2, After:=moveGroups(iGroup).lastMoveRef
+              Set moveGroups(iGroup).lastMoveRef = cmd2
+              move2.Extrusion = move2.time * retractSpeed
+              cmd2.RecomputeStates
+              cmd2.setMove move2, EError2
+              cmd2.RecomputeStates
+              Exit Do
+            End If
           Else
-            cmd.split t + cmd.execTime, EError1
-            
-            'modify the first part of splitting, injecting unretraction
-            cmd.constructMove
-            Set move = cmd.getMove
-            move.Extrusion = move.Extrusion + retractSpeed * move.time
-            cmd.setMove move, EError1
-            
-            'add copy of the command, for retraction
-            Set cmd2 = New clsGCommand
-            moveGroups(iGroup).chain.Add cmd2, After:=moveGroups(iGroup).lastMoveRef
-            Set moveGroups(iGroup).lastMoveRef = cmd2
-            move.Extrusion = -retractSpeed * move.time
-            cmd2.RecomputeStates
-            cmd2.setMove move, EError2
-            cmd2.RecomputeStates
-            Exit Do
+            Debug.Assert False
           End If
           Set cmd = cmd.getNextMove
         Loop
