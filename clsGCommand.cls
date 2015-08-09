@@ -44,7 +44,7 @@ End Enum
 
 Private Type typLetVal 'letter + value, argument of g command
   'letter as byte = index of array
-  value As Double
+  Value As Double
   specified As Boolean
 End Type
 
@@ -73,34 +73,34 @@ Dim arg As typLetVal
 arg = arguments(Asc("X"))
 If arg.specified Then
   If stateBefore.MoveRelative Then
-    stateAfter.pos.X = stateAfter.pos.X + arg.value
+    stateAfter.pos.X = stateAfter.pos.X + arg.Value
   Else
-    stateAfter.pos.X = arg.value
+    stateAfter.pos.X = arg.Value
   End If
 End If
 arg = arguments(Asc("Y"))
 If arg.specified Then
   If stateBefore.MoveRelative Then
-    stateAfter.pos.Y = stateAfter.pos.Y + arg.value
+    stateAfter.pos.Y = stateAfter.pos.Y + arg.Value
   Else
-    stateAfter.pos.Y = arg.value
+    stateAfter.pos.Y = arg.Value
   End If
 End If
 arg = arguments(Asc("Z"))
 If arg.specified Then
   If stateBefore.MoveRelative Then
-    stateAfter.pos.Z = stateAfter.pos.Z + arg.value
+    stateAfter.pos.Z = stateAfter.pos.Z + arg.Value
   Else
-    stateAfter.pos.Z = arg.value
+    stateAfter.pos.Z = arg.Value
   End If
 End If
 
 arg = arguments(Asc("E"))
 If arg.specified Then
   If stateBefore.ExtrusionRelative Then
-    stateAfter.Epos = stateBefore.Epos + arg.value
+    stateAfter.Epos = stateBefore.Epos + arg.Value
   Else
-    stateAfter.Epos = arg.value
+    stateAfter.Epos = arg.Value
   End If
   If preserveDeltaE Then
     stateAfter.Epos = stateBefore.Epos + oldDeltaE
@@ -113,7 +113,7 @@ End If
 
 arg = arguments(Asc("F"))
 If arg.specified Then
-  stateAfter.Speed = arg.value / 60 'convert to mm/s
+  stateAfter.Speed = arg.Value / 60 'convert to mm/s
 End If
 
 Select Case myCmdType
@@ -127,16 +127,16 @@ Select Case myCmdType
     stateAfter.ExtrusionRelative = True
   Case eGCommand.G92_overridePos
     If arguments(Asc("E")).specified Then
-      stateAfter.Epos = arguments(Asc("E")).value
+      stateAfter.Epos = arguments(Asc("E")).Value
     End If
     If arguments(Asc("X")).specified Then
-      stateAfter.pos.X = arguments(Asc("X")).value
+      stateAfter.pos.X = arguments(Asc("X")).Value
     End If
     If arguments(Asc("Y")).specified Then
-      stateAfter.pos.Y = arguments(Asc("Y")).value
+      stateAfter.pos.Y = arguments(Asc("Y")).Value
     End If
     If arguments(Asc("Z")).specified Then
-      stateAfter.pos.Z = arguments(Asc("Z")).value
+      stateAfter.pos.Z = arguments(Asc("Z")).Value
     End If
 End Select
 End Sub
@@ -150,7 +150,7 @@ Me.strLine = Me.strLine + Chr$(myCmdType And &HFF&) + vtStr((myCmdType And &HFF0
 Dim i As Long
 For i = LBound(arguments) To UBound(arguments)
   If arguments(i).specified Then
-    Me.strLine = Me.strLine + " " + Chr$(i) + vtStr(arguments(i).value)
+    Me.strLine = Me.strLine + " " + Chr$(i) + vtStr(arguments(i).Value)
   End If
 Next i
 End Sub
@@ -208,14 +208,14 @@ On Error GoTo eh
       If firstletter < Asc("A") Or firstletter > Asc("Z") Then
         Throw errInvalidCommand, extraMessage:="first character of a word in a command must be a latin letter; it is """ + Chr$(firstletter) + """"
       End If
-      Dim value As Double
-      value = val(Mid$(words(iword), 2))
+      Dim Value As Double
+      Value = val(Mid$(words(iword), 2))
       
       If iword = 0 Then
-        myCmdType = CLng(value) * &H100 + firstletter
+        myCmdType = CLng(Value) * &H100 + firstletter
       Else
         arguments(firstletter).specified = True
-        arguments(firstletter).value = value
+        arguments(firstletter).Value = Value
       End If
     End If
   Next iword

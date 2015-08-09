@@ -389,7 +389,7 @@ For iGroup = 0 To nMoveGroups - 1
 Next iGroup
 Debug.Assert (chain.size = 0) 'chain should have been taken apart completely while splitting
 
-If Me.chkSeamConceal.value = vbChecked Then
+If Me.chkSeamConceal.Value = vbChecked Then
   Me.cmdProcessFile.Caption = "blending seams"
   DoEvents
   
