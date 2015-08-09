@@ -43,6 +43,14 @@ ret.Z = Me.Z - right.Z
 Set Subtrd = ret
 End Function
 
+Friend Function SubtrdT(right As typVector3D) As clsVector3D
+Dim ret As New clsVector3D
+ret.X = Me.X - right.X
+ret.Y = Me.Y - right.Y
+ret.Z = Me.Z - right.Z
+Set SubtrdT = ret
+End Function
+
 Public Function Multed(multiplier As Double) As clsVector3D
 Dim ret As New clsVector3D
 ret.X = Me.X * multiplier
@@ -76,9 +84,9 @@ End If
 End Function
 
 Public Sub Round()
-Me.X = VBA.Round(Me.X, mdlCommon.posDecimals)
-Me.Y = VBA.Round(Me.Y, mdlCommon.posDecimals)
-Me.Z = VBA.Round(Me.Z, mdlCommon.posDecimals)
+Me.X = VBA.Round(Me.X, mdlPrecision.posDecimals)
+Me.Y = VBA.Round(Me.Y, mdlPrecision.posDecimals)
+Me.Z = VBA.Round(Me.Z, mdlPrecision.posDecimals)
 End Sub
 
 Public Function Copy() As clsVector3D

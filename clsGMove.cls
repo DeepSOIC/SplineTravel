@@ -18,9 +18,6 @@ Public p2 As clsVector3D
 Public time As Double 'mm/s
 Public Extrusion As Double 'in raw filament length, or whatever was printed to the G-code being processed. Positive for extrusion, negative for retraction.
 
-Public PreviousMoveRef As clsGMove
-
-
 Public Property Get traveldist() As Double
 traveldist = p1.Subtrd(p2).Length
 End Property
@@ -66,7 +63,7 @@ Dim outStr As String
 Me.isValid throwIfInvalid:=True
 If Not Me.isPause Then
   'move
-  
+    
   'write position change
   Dim D As clsVector3D 'move vector (relative)
   Set D = Me.p2.Subtrd(Me.p1)
@@ -77,32 +74,33 @@ If Not Me.isPause Then
     Set wr = Me.p2
   End If
   wr.Round
-  If Abs(D.X) > 1E-100 Then
+  Set D = Me.p2.SubtrdT(CurrentState.pos) 'may differ from p1 because of rounding errors
+  If Abs(D.X) > mdlPrecision.posConfusion Then
     outStr = outStr + " X" + vtStr(wr.X)
   End If
-  If Abs(D.Y) > 1E-100 Then
+  If Abs(D.Y) > mdlPrecision.posConfusion Then
     outStr = outStr + " Y" + vtStr(wr.Y)
   End If
-  If Abs(D.Z) > 1E-100 Then
+  If Abs(D.Z) > mdlPrecision.posConfusion Then
     outStr = outStr + " Z" + vtStr(wr.Z)
   End If
   
   If time > 0 Then
-    If Abs(Me.Speed - CurrentState.Speed) > 0.001 Then
-      outStr = outStr + " F" + vtStr(Round(Me.Speed * 60, mdlCommon.speedDecimals))
+    If Abs(Me.Speed - CurrentState.Speed) > mdlPrecision.speedConfusion Then
+      outStr = outStr + " F" + vtStr(Round(Me.Speed * 60, mdlPrecision.speedDecimals))
     End If
   End If
   'write extrusion change
-  If Abs(Me.Extrusion) > 1E-100 Then
+  If Abs(Me.Extrusion) > mdlPrecision.extrConfusion Then
     Dim wrE As Double
     If CurrentState.ExtrusionRelative Then
       wrE = Me.Extrusion + EError
-      EError = wrE - Round(wrE, mdlCommon.extrDecimals)
+      EError = wrE - Round(wrE, mdlPrecision.extrDecimals)
     Else
       'absolute E values
       wrE = CurrentState.Epos + Me.Extrusion
     End If
-    wrE = Round(wrE, mdlCommon.extrDecimals)
+    wrE = Round(wrE, mdlPrecision.extrDecimals)
     outStr = outStr + " E" + vtStr(wrE)
   End If
   
@@ -112,7 +110,7 @@ If Not Me.isPause Then
   
 Else
   'pause
-  GenerateGCode = "G4 P" + vtStr(Round(Me.time * 1000))
+  GenerateGCode = "G4 P" + vtStr(Round(Me.time * 1000, Decimals:=0))
 End If
 End Function
 

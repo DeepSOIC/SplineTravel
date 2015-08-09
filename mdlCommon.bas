@@ -18,15 +18,11 @@ Public Type typCurrentState
   ExtrusionRelative As Boolean
 End Type
 
-Public posDecimals As Integer
-Public extrDecimals As Integer
-Public speedDecimals As Integer
-
-Public test As clsRetractCurve
-
 Function vtStr(val As Double) As String
 vtStr = Trim(Str(val))
 End Function
+
+
 
 
 'some vector-type routines, for faster processing without creating vectors

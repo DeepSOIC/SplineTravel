@@ -651,8 +651,6 @@ End If
 End Function
 
 Private Sub Form_Load()
-mdlCommon.extrDecimals = 4
-mdlCommon.posDecimals = 3
-mdlCommon.speedDecimals = 3
+mdlPrecision.InitModule
 End Sub
 

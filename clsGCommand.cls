@@ -106,7 +106,7 @@ If arg.specified Then
     stateAfter.Epos = stateBefore.Epos + oldDeltaE
     If Not stateBefore.ExtrusionRelative Then
       'update E argument
-      arg.value = vtStr(Round(stateAfter.Epos, mdlCommon.extrDecimals))
+      arg.Value = vtStr(Round(stateAfter.Epos, mdlPrecision.extrDecimals))
     End If
   End If
 End If
