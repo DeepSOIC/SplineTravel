@@ -144,10 +144,18 @@ Do
   Dim timestep As Double
   bz.getDeriv2 cur_t, acc
   acc.Mult 1 / TimeOfMove ^ 2
-  timestep1 = Me.CurveJerk / acc.Length
+  If acc.Length > 1E-100 Then
+    timestep1 = Me.CurveJerk / acc.Length
+  Else
+    timestep1 = TimeOfMove * (1 - cur_t + 0.001)
+  End If
   bz.getDeriv2 cur_t + timestep1 / TimeOfMove, acc
   acc.Mult 1 / TimeOfMove ^ 2
-  timestep2 = Me.CurveJerk / acc.Length
+  If acc.Length > 1E-100 Then
+    timestep2 = Me.CurveJerk / acc.Length
+  Else
+    timestep2 = TimeOfMove * (1 - cur_t + 0.001)
+  End If
   timestep1 = (timestep1 + timestep2) / 2
 
   Dim accE As Double
