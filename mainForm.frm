@@ -654,3 +654,6 @@ Private Sub Form_Load()
 mdlPrecision.InitModule
 End Sub
 
+Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
+End
+End Sub
