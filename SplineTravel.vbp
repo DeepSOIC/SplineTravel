@@ -11,6 +11,7 @@ Class=clsGCommand; clsGCommand.cls
 Class=clsChain; clsChain.cls
 Class=clsRetractCurve; clsRetractCurve.cls
 Module=mdlPrecision; mdlPrecision.bas
+Module=Vector3D; Vector3D.bas
 IconForm="mainForm"
 Startup="mainForm"
 HelpFile=""

@@ -168,7 +168,7 @@ Public Function getEnterSpeed() As clsVector3D
 Set getEnterSpeed = _
   makeClsVector(stateAfter.pos) _
   .Subtrd(makeClsVector(stateBefore.pos)) _
-  .normalized.Multed(stateAfter.Speed)
+  .Normalized.Multed(stateAfter.Speed)
 End Function
 
 Public Function getExitSpeed() As clsVector3D
@@ -332,7 +332,7 @@ If Not isMove Then
   Exit Property
 End If
 Dim traveldist As Double
-traveldist = mdlCommon.dist(stateBefore.pos, stateAfter.pos)
+traveldist = Vector3D.Dist(stateBefore.pos, stateAfter.pos)
 If traveldist < 1E-100 Then
   isTravelMove = False
   Exit Function
@@ -350,7 +350,7 @@ If Not isMove Then
   Exit Property
 End If
 Dim traveldist As Double
-traveldist = mdlCommon.dist(stateBefore.pos, stateAfter.pos)
+traveldist = Vector3D.Dist(stateBefore.pos, stateAfter.pos)
 If traveldist > 1E-100 Then
   isExtruderMove = False
   Exit Property
@@ -383,7 +383,7 @@ If Not isMove Then
   Exit Property
 End If
 Dim traveldist As Double
-traveldist = mdlCommon.dist(stateBefore.pos, stateAfter.pos)
+traveldist = Vector3D.Dist(stateBefore.pos, stateAfter.pos)
 If traveldist < 1E-100 Then
   isBuildMove = False
   Exit Property

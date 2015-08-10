@@ -10,6 +10,8 @@ Public posConfusion As Double
 Public extrConfusion As Double
 Public speedConfusion As Double
 
+Public Const RelConfusion As Double = 0.000000000001
+
 Public Sub InitModule()
 posDecimals = 3
 extrDecimals = 3

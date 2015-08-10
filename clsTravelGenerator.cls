@@ -61,8 +61,8 @@ outSpeed_hop.Z = outSpeed_hop.Z - Me.ZJerk
 Dim stopDist As Double 'the path length required to stop moving, we are going to use it for computing starting values
 stopDist = Me.accelleration * (spd / Me.accelleration) ^ 2 / 2#
 
-bz.Pole(0).copyFrom Me.p1
-bz.Pole(3).copyFrom Me.p2
+bz.Pole(0) = Me.p1.asTypVector3D
+bz.Pole(3) = Me.p2.asTypVector3D
 
 Dim time As Double 'time it is to take to move through the whole spline
 Dim timeOfSolved As Double
@@ -73,8 +73,8 @@ Dim logFactor As Double
 logFactor = 0.25 'sets, how fast to smooth out the spline (by increasing time) on each iteration
 Dim i As Long
 For i = 1 To iterCount
-  bz.Pole(1).copyFrom Me.p1.Added(inSpeed_hop.Multed(time / 3))
-  bz.Pole(2).copyFrom Me.p2.Added(outSpeed_hop.Multed(-time / 3))
+  bz.Pole(1) = Me.p1.Added(inSpeed_hop.Multed(time / 3)).asTypVector3D
+  bz.Pole(2) = Me.p2.Added(outSpeed_hop.Multed(-time / 3)).asTypVector3D
   'test if the spline has enter and exit speeds correct (assert)
 '  Dim vin As clsVector3D
 '  Dim vout As clsVector3D
@@ -88,8 +88,8 @@ For i = 1 To iterCount
   'calculate max accelleration; test if this spline is smooth enough already
   Dim acc1 As clsVector3D
   Dim acc2 As clsVector3D
-  bz.getDeriv2 0, acc1
-  bz.getDeriv2 0, acc2
+  Set acc1 = Vector3D.makeClsVector(bz.getDeriv2(0))
+  Set acc2 = Vector3D.makeClsVector(bz.getDeriv2(0))
   acc1.Mult 1 / time ^ 2
   acc2.Mult 1 / time ^ 2
   If maxD(acc1.Length, acc2.Length) <= Me.accelleration Then
@@ -133,67 +133,46 @@ nalloc = 10
 ReDim arrMoves(0 To nalloc - 1)
 Dim curMove As clsGMove
 
+bz.DerivJerk = Me.CurveJerk * TimeOfMove
+rtr.DerivJerk = Me.RetractJerk * TimeOfMove
 
 Dim cur_t As Double
 Dim prev_t As Double
+Dim prevPos As typVector3D
+Dim curPos As typVector3D
+curPos = bz.getPole(0)
+prevPos = curPos
+
 cur_t = 0
 Do
-  'compute current accelleration and use it to derive t-step
-  Dim acc As clsVector3D
-  Dim timestep1 As Double, timestep2 As Double, timestep3 As Double '1,2 = for spline, 2 - for retract
-  Dim timestep As Double
-  bz.getDeriv2 cur_t, acc
-  acc.Mult 1 / TimeOfMove ^ 2
-  If acc.Length > 1E-100 Then
-    timestep1 = Me.CurveJerk / acc.Length
-  Else
-    timestep1 = TimeOfMove * (1 - cur_t + 0.001)
-  End If
-  bz.getDeriv2 cur_t + timestep1 / TimeOfMove, acc
-  acc.Mult 1 / TimeOfMove ^ 2
-  If acc.Length > 1E-100 Then
-    timestep2 = Me.CurveJerk / acc.Length
-  Else
-    timestep2 = TimeOfMove * (1 - cur_t + 0.001)
-  End If
-  timestep1 = (timestep1 + timestep2) / 2
-
-  Dim accE As Double
-  accE = Abs(rtr.getDeriv2(cur_t))
-  If accE > 1E-100 Then
-    timestep3 = Me.RetractJerk / Abs(accE / TimeOfMove ^ 2)
-  Else
-    timestep3 = 1E+100
-  End If
-  timestep = minD(timestep1, timestep3)
-  
-  'att t-step
+  'compute timestep
   prev_t = cur_t
-  cur_t = cur_t + timestep / TimeOfMove
-  If cur_t > 1 Then
-    timestep = timestep - (cur_t - 1) * TimeOfMove
-    cur_t = 1
-  End If
-  rtr.shrink_interval prev_t, cur_t 'to not miss the point where retraction begins
+  cur_t = 1
+  bz.shrink_interval prev_t, cur_t
+  rtr.shrink_interval prev_t, cur_t
+  Dim timestep As Double
+  timestep = TimeOfMove * (cur_t - prev_t)
   
-  'compute new position, and generate the move
-  'Dim pos As clsVector3D
-  Dim prevPos As clsVector3D
-  If prevPos Is Nothing Then
-    Set prevPos = New clsVector3D
-    prevPos.copyFrom bz.getPole(0)
-  Else
-    prevPos.copyFrom curMove.p2
-  End If
+  prevPos = curPos
+  curPos = bz.getValue(cur_t)
+  
+  'test for jerk
+  Dim moveJerk As Double
+  moveJerk = Vector3D.Length(Vector3D.Combi2(bz.getDeriv(cur_t), 1 / TimeOfMove, bz.getDeriv(prev_t), -1 / TimeOfMove))
+  Debug.Assert moveJerk < Me.CurveJerk * 1.1
+  
+  'Debug.Print "; ";
+  Dim rtrJerk As Double
+  rtrJerk = Abs(rtr.getDeriv(cur_t) * 1 / TimeOfMove - rtr.getDeriv(prev_t) * 1 / TimeOfMove)
+  Debug.Assert rtrJerk < Me.RetractJerk * 1.1
   
   GoSub addMove
-  curMove.p1.copyFrom prevPos
-  bz.getValue cur_t, curMove.p2
+  curMove.p1.copyFromT prevPos
+  curMove.p2.copyFromT curPos
   curMove.time = timestep
   If curMove.Speed > Me.speedLimit Then curMove.Speed = speedLimit
   curMove.Extrusion = -(rtr.getValue(cur_t) - rtr.getValue(prev_t))
-  'If cur_t > 0.5 Then Debug.Assert (-(rtr.getValue(cur_t) - rtr.getValue(prev_t)) > 0)
-Loop Until cur_t >= 1#
+Loop Until cur_t >= 1# - mdlPrecision.RelConfusion
 
 ReDim Preserve arrMoves(0 To nMoves - 1)
 

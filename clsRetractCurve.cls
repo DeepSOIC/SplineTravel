@@ -22,6 +22,8 @@ Private Type typThis
   
   bRetract As Boolean 'set to false to suppress retraction, but keep unretraction
   bUnretract As Boolean 'set to false to suppress unretraction, but keep retraction
+  
+  DerivJerk As Double 'defines tessellation; in E units (speed not by time, but by parameter)
 
   dt_acc As Double 'time it takes to accellerate to full retraction speed
   t_start1 As Double '=zero
@@ -64,6 +66,8 @@ Public Property Let RetractLen(ByVal newVal As Double)
 this.RetractLenSetting = newVal
 invalidate
 End Property
+
+
 
 
 
@@ -177,20 +181,51 @@ If this.invalidated Then recompute
 Dim ret As Boolean: ret = False
 
 Dim t_breakpoint As Double
+t_breakpoint = getNextBreakpoint(prev_t)
+
+Dim tstep As Double
+
+tstep = 100
+Dim acc As Double
+acc = Abs(Me.getDeriv2(prev_t))
+If acc > 1E-100 Then
+  tstep = this.DerivJerk / acc
+End If
+
+'collapse to a breakpoint
+If prev_t + tstep > t_breakpoint Then
+  tstep = t_breakpoint - prev_t
+End If
+
+'small final step prevention logic: if step to nearest breakpoint after this step is much smaller than this step, reduce this step
+Dim tstepToEnd As Double
+tstepToEnd = t_breakpoint - prev_t
+If tstep < tstepToEnd - mdlPrecision.RelConfusion And tstepToEnd - tstep < tstepToEnd * 0.25 Then
+  tstep = tstepToEnd * 0.3
+End If
+
+If cur_t > prev_t + tstep + mdlPrecision.RelConfusion Then
+  cur_t = prev_t + tstep
+  shrink_interval = True
+End If
+End Function
+
+Private Function getNextBreakpoint(ByVal prev_t As Double) As Double
+Dim ret As Double
+ret = 1
+Dim t_breakpoint As Double
 
 t_breakpoint = this.t_start1 / this.MoveTime
-If prev_t < t_breakpoint And cur_t > t_breakpoint Then
-  cur_t = t_breakpoint
-  ret = True
+If prev_t < t_breakpoint - mdlPrecision.RelConfusion And ret > t_breakpoint + mdlPrecision.RelConfusion Then
+  ret = t_breakpoint
 End If
   
 t_breakpoint = this.t_start2 / this.MoveTime
-If prev_t < t_breakpoint And cur_t > t_breakpoint Then
-  cur_t = t_breakpoint
-  ret = True
+If prev_t < t_breakpoint - mdlPrecision.RelConfusion And ret > t_breakpoint + mdlPrecision.RelConfusion Then
+  ret = t_breakpoint
 End If
 
-shrink_interval = ret
+getNextBreakpoint = ret
 End Function
 
 Private Sub Class_Initialize()
@@ -223,4 +258,13 @@ End Property
 Public Property Get ActualRetract() As Double
 If this.invalidated Then recompute
 ActualRetract = this.RetractLen
+End Property
+
+Public Property Get DerivJerk() As Double
+DerivJerk = this.DerivJerk
+End Property
+
+Public Property Let DerivJerk(ByVal newVal As Double)
+this.DerivJerk = newVal
+invalidate
 End Property
