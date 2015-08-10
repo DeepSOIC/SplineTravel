@@ -405,7 +405,7 @@ If Me.chkSeamConceal.Value = vbChecked Then
       Dim p1 As typVector3D, p2 As typVector3D
       p1 = moveGroups(iGroup).firstMoveRef.CompleteStateBefore.pos
       p2 = moveGroups(iGroup).lastMoveRef.CompleteStateAfter.pos
-      If mdlCommon.dist(p1, p2) <= loopTol Then
+      If Vector3D.Dist(p1, p2) <= loopTol Then
         'generate unretract
         Dim t As Double
         Dim EError1 As Double: EError1 = 0
