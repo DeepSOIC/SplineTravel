@@ -725,10 +725,125 @@ If Abs(Timer - lastDidTime) > 0.3 Then
 End If
 End Function
 
+Private Sub cmdResetSettings_Click()
+Me.ResetSettings includeFilenames:=False
+End Sub
+
 Private Sub Form_Load()
 mdlPrecision.InitModule
 End Sub
 
 Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
-End
+If UnloadMode = QueryUnloadConstants.vbFormCode Then
+  'a temporary form was created and is being destroyed, nothing special needs to be done
+Else
+  'explicitly terminate the application. This will prevent the app from keeping running if it is closed while processing a file
+  End
+End If
+End Sub
+
+
+
+
+
+
+
+
+Public Function GetConfigString(Optional ByVal includeFilenames As Boolean) As String
+Dim ctr As Control
+Dim configStr As New StringAccumulator
+For Each ctr In Me
+  Dim strLine As String
+  strLine = ""
+  
+  If ctr.Tag = "!f" And Not includeFilenames Then GoTo continue
+  
+  If TypeOf ctr Is TextBox Then
+    Dim txt As TextBox
+    Set txt = ctr
+    strLine = txt.Name + ".Text" + " = " + EscapeString(txt.Text)
+  ElseIf TypeOf ctr Is CheckBox Then
+    Dim chk As CheckBox
+    Set chk = ctr
+    strLine = chk.Name + ".Value" + " = " + Trim(Str(chk.Value))
+  End If
+  
+  If Len(strLine) > 0 Then
+    configStr.Append strLine + vbNewLine
+  End If
+continue:
+Next
+GetConfigString = configStr.Content
+End Function
+
+'fills the settings from the config string
+Public Sub ApplyConfigStr(configStr As String, Optional ByVal suppressErrorMessages As Boolean = False, Optional ByVal includeFilenames As Boolean)
+On Error GoTo eh
+Dim lines() As String
+lines = split(configStr, vbNewLine)
+Dim i As Long
+For i = 0 To UBound(lines)
+  Dim strLine As String
+  strLine = lines(i)
+  If Not Len(strLine) > 0 Then GoTo continue
+  
+  Dim hs() As String
+  hs = split(strLine, "=", limit:=2)
+  If UBound(hs) <> 1 Then Throw errWrongConfigLine, "ApplyConfigStr", extraMessage:="Failed to split left-hand-side and right-hand-side in config line number " + Str(i)
+  hs(0) = Trim(hs(0))
+  'l-trim the value string, but only one space that is attached to " = "
+  If Len(hs(1)) > 0 Then
+    If Mid$(hs(1), 1, 1) = " " Then
+      hs(1) = Mid$(hs(1), 2)
+    End If
+  End If
+  
+  Dim objprop() As String 'split object name and property name
+  objprop = split(hs(0), ".", limit:=2)
+  If UBound(objprop) <> 1 Then Throw errWrongConfigLine, "ApplyConfigStr", extraMessage:="Failed to split object and property in config line number " + Str(i)
+  
+  Dim objName As String: objName = Trim(objprop(0))
+  Dim propName As String: propName = Trim(objprop(1))
+  Dim obj As Control:  Set obj = Nothing
+  Set obj = CallByName(Me, objName, VbGet)
+  If Not obj Is Nothing Then
+    If obj.Tag = "!f" And Not includeFilenames Then GoTo continue
+    CallByName obj, propName, VbLet, unEscapeString(hs(1))
+  End If
+continue:
+Next i
+
+Exit Sub
+eh:
+  Dim answ As VbMsgBoxResult
+  If Not suppressErrorMessages Then
+    answ = MsgError(Style:=vbAbortRetryIgnore)
+  Else
+    answ = vbIgnore
+    Debug.Print Err.source, Err.Description
+  End If
+  
+  If answ = vbIgnore Then
+    Resume continue
+  ElseIf answ = vbRetry Then
+    Resume
+  Else
+    Exit Sub
+  End If
+End Sub
+
+
+Public Sub ResetSettings(Optional ByVal includeFilenames As Boolean = False)
+Dim tmpForm As mainForm
+Set tmpForm = New mainForm
+Load tmpForm
+On Error GoTo cleanup
+Me.ApplyConfigStr tmpForm.GetConfigString(includeFilenames:=includeFilenames), includeFilenames:=includeFilenames
+Unload tmpForm
+Exit Sub
+cleanup:
+PushError
+Unload tmpForm
+PopError
+Throw
 End Sub

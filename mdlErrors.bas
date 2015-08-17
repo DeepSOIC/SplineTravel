@@ -23,6 +23,7 @@ Public Enum eErrors
   errNotInChain = 12349
   errAlreadyInChain = 12350
   errVerificationFailed = 12351
+  errWrongConfigLine = 12352
   
   'standard errors
   errCancel = 32755
@@ -54,6 +55,8 @@ Select Case er
     Message = "Command is already in a chain"
   Case errVerificationFailed
     Message = ""
+  Case errWrongConfigLine
+    Message = "Wrong config line"
     
   'standard errors
   Case errCancel
