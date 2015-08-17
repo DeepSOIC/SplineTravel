@@ -8,7 +8,6 @@ Begin VB.Form mainForm
    ClientWidth     =   11850
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   MinButton       =   0   'False
    ScaleHeight     =   5040
    ScaleWidth      =   11850
    StartUpPosition =   3  'Windows Default
