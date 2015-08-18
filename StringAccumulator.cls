@@ -48,3 +48,8 @@ End Function
 Public Property Get Length() As Long
 Length = nRealChars
 End Property
+
+Public Sub Backspace(ByVal numCharsToErase As Long)
+nRealChars = nRealChars - numCharsToErase
+If nRealChars < 0 Then nRealChars = 0
+End Sub

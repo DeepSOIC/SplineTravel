@@ -260,12 +260,13 @@ Begin VB.Form mainForm
       TabIndex        =   5
       Top             =   40
       Width           =   8180
-      Begin VB.CommandButton Command2 
+      Begin VB.CommandButton cmdDelete 
          Caption         =   "Delete"
          Height          =   390
          Left            =   5520
          TabIndex        =   8
          Top             =   250
+         Visible         =   0   'False
          Width           =   720
       End
       Begin VB.ComboBox cmbPreset 
@@ -273,13 +274,12 @@ Begin VB.Form mainForm
          ItemData        =   "mainForm.frx":015B
          Left            =   100
          List            =   "mainForm.frx":015D
-         Locked          =   -1  'True
+         Style           =   2  'Dropdown List
          TabIndex        =   7
-         Text            =   "cmbPeset"
          Top             =   310
          Width           =   4110
       End
-      Begin VB.CommandButton Command1 
+      Begin VB.CommandButton cmdSaveAs 
          Caption         =   "Save as..."
          Height          =   340
          Left            =   4320
@@ -369,6 +369,33 @@ Private Type typTravelMoveRef
   nextBuildMoveBegin As clsGCommand
   'nextBuildMoveEnd As clsGCommand
 End Type
+
+Private Type typPresetManagerGlobals
+  filesInCombo() As String 'full paths
+  block As New clsBlokada  'locks response to events, for when filling preset list
+  curPresetIsModified As Boolean
+  curPresetFN As String
+End Type
+Dim pm As typPresetManagerGlobals
+
+Private Sub cmbPreset_Click()
+If pm.block Then Exit Sub
+On Error GoTo eh
+If Me.getSelectedPreset = pm.curPresetFN Then Exit Sub  'no change
+If pm.curPresetIsModified Then
+  Dim answ As VbMsgBoxResult
+  answ = MsgBox("Current preset was modified. The changes will be lost. Continue anyway?", vbYesNo Or vbDefaultButton2)
+  If answ = vbNo Then
+    Me.SelectPreset pm.curPresetFN
+    Exit Sub
+  End If
+End If
+Me.LoadPreset Me.getSelectedPreset
+Exit Sub
+eh:
+MsgError
+Me.SelectPreset pm.curPresetFN
+End Sub
 
 Private Sub cmdProcessFile_Click()
 cmdProcessFile.Enabled = False
@@ -478,8 +505,8 @@ If Me.chkSeamConceal.Value = vbChecked Then
   For iGroup = 0 To nMoveGroups - 1
     If moveGroups(iGroup).chType = ectBuildChain Then
       Dim p1 As typVector3D, p2 As typVector3D
-      p1 = moveGroups(iGroup).firstMoveRef.CompleteStateBefore.pos
-      p2 = moveGroups(iGroup).lastMoveRef.CompleteStateAfter.pos
+      p1 = moveGroups(iGroup).firstMoveRef.CompleteStateBefore.Pos
+      p2 = moveGroups(iGroup).lastMoveRef.CompleteStateAfter.Pos
       If Vector3D.Dist(p1, p2) <= loopTol Then
         'generate unretract
         Dim t As Double
@@ -581,8 +608,8 @@ If Me.chkSeamConceal.Value = vbChecked Then
         Set cmd = moveGroups(iGroup).chain.first
         Do
           cmd.RecomputeStates preserveDeltaE:=True
-          Debug.Assert cmd.CompleteStateBefore.pos.X <> 0
-          Debug.Assert cmd.CompleteStateAfter.pos.X <> 0
+          Debug.Assert cmd.CompleteStateBefore.Pos.X <> 0
+          Debug.Assert cmd.CompleteStateAfter.Pos.X <> 0
           cmd.regenerateString
           If cmd Is moveGroups(iGroup).chain.last Then Exit Do
           Set cmd = cmd.nextCommand
@@ -642,8 +669,8 @@ For iGroup = 0 To nMoveGroups - 1
     gen.bRetract = Not moveGroups(iGroup - 1).retractInjected
     gen.bUnretract = Not moveGroups(iGroup + 1).unretractInjected
         
-    gen.p1.copyFromT mv.prevBuildMoveEnd.CompleteStateAfter.pos
-    gen.p2.copyFromT mv.nextBuildMoveBegin.CompleteStateBefore.pos
+    gen.p1.copyFromT mv.prevBuildMoveEnd.CompleteStateAfter.Pos
+    gen.p2.copyFromT mv.nextBuildMoveBegin.CompleteStateBefore.Pos
     Set gen.inSpeed = mv.prevBuildMoveEnd.getExitSpeed
     Set gen.outSpeed = mv.nextBuildMoveBegin.getEnterSpeed
     Dim arrSegments() As clsGMove
@@ -729,6 +756,56 @@ Private Sub cmdResetSettings_Click()
 Me.ResetSettings includeFilenames:=False
 End Sub
 
+Private Sub cmdSaveAs_Click()
+On Error GoTo eh
+Dim presetName As String
+presetName = getFileTitle(pm.curPresetFN)
+Dim newPresetName As String
+again:
+newPresetName = InputBox("Name the preset. Entering a new name will keep current preset intact.", presetName)
+If Len(newPresetName) = 0 Then Exit Sub
+verifyPresetName newPresetName
+Dim newPresetFilename As String
+If StrComp(newPresetName, presetName, vbTextCompare) = 0 Then
+  newPresetFilename = pm.curPresetFN
+Else
+  Dim paths() As String
+  paths = mdlFiles.PresetsPaths
+  newPresetFilename = paths(UBound(paths)) + newPresetName + ".ini"
+  If Me.FindInCombo(newPresetFilename) <> -1 Then
+    If MsgBox("Overwriting another existing preset. Continue?", vbYesNo Or vbDefaultButton2) = vbNo Then
+      Exit Sub
+    End If
+  End If
+End If
+WritePresetFile newPresetFilename, Me.GetConfigString
+pm.curPresetFN = newPresetFilename
+pm.curPresetIsModified = False
+Me.RefillPresets
+Exit Sub
+eh:
+MsgError
+
+End Sub
+
+Public Sub verifyPresetName(ByRef newName As String)
+Dim i As Long
+Dim ch As String
+Const allowedCharacters As String = " ,.-+=!()'1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+newName = Trim(newName)
+If Len(newName) = 0 Then Throw errInvalidArgument, extraMessage:="preset name is empty"
+For i = 1 To Len(newName)
+  ch = Mid$(newName, i, 1)
+  If InStr(allowedCharacters, ch) = 0 Then
+    Throw errInvalidArgument, extraMessage:="preset name contains an invalid character " + ch
+  End If
+Next i
+End Sub
+
+Private Sub Form_Activate()
+Me.RefillPresets
+End Sub
+
 Private Sub Form_Load()
 mdlPrecision.InitModule
 End Sub
@@ -773,7 +850,7 @@ For Each ctr In Me
   End If
 continue:
 Next
-GetConfigString = configStr.Content
+GetConfigString = configStr.content
 End Function
 
 'fills the settings from the config string
@@ -828,7 +905,7 @@ eh:
   ElseIf answ = vbRetry Then
     Resume
   Else
-    Exit Sub
+    Throw errCancel
   End If
 End Sub
 
@@ -847,3 +924,114 @@ Unload tmpForm
 PopError
 Throw
 End Sub
+
+Public Sub RefillPresets()
+Dim keeper As clsBlokada: Set keeper = pm.block.block
+
+pm.filesInCombo = mdlFiles.getListOfFiles(mdlFiles.PresetsPaths, "*.ini")
+cmbPreset.Clear
+Dim i As Long
+For i = 0 To ArrLen(pm.filesInCombo) - 1
+  cmbPreset.AddItem mdlFiles.getFileTitle(pm.filesInCombo(i))
+  cmbPreset.ItemData(cmbPreset.NewIndex) = i
+  If pm.curPresetFN = pm.filesInCombo(i) And pm.curPresetIsModified Then
+    cmbPreset.List(cmbPreset.NewIndex) = cmbPreset.List(cmbPreset.NewIndex) + "*"
+  End If
+Next i
+
+Me.SelectPreset pm.curPresetFN
+
+keeper.Unblock
+End Sub
+
+'returns -1 if item not found
+Public Function FindInCombo(presetFilePath As String) As Long
+FindInCombo = -1
+Dim i As Long
+For i = 0 To cmbPreset.ListCount - 1
+  If StrComp(pm.filesInCombo(cmbPreset.ItemData(i)), presetFilePath, vbTextCompare) = 0 Then
+    FindInCombo = i
+  End If
+Next i
+End Function
+
+Private Function ArrLen(arr As Variant) As Long
+Dim ub As Long: ub = -1
+On Error Resume Next
+ub = UBound(arr)
+ArrLen = ub + 1
+End Function
+
+Public Sub LoadPreset(FilePath As String)
+Dim tmp As String
+tmp = ReadPresetFile(FilePath)
+Me.ResetSettings
+Me.ApplyConfigStr tmp
+Me.SelectPreset FilePath
+pm.curPresetFN = FilePath
+pm.curPresetIsModified = False
+End Sub
+
+Public Function ReadPresetFile(FilePath As String) As String
+Dim f As Long: f = FreeFile
+Open FilePath For Input As f
+On Error GoTo cleanup
+  ReadPresetFile = Input$(LOF(f), #(f))
+Close f
+Exit Function
+cleanup:
+  PushError
+  Close f
+  PopError
+  Throw
+End Function
+
+Public Sub WritePresetFile(FilePath As String, content As String)
+Dim f As Long: f = FreeFile
+Open FilePath For Output As f
+On Error GoTo cleanup
+  Print #(f), content;
+Close f
+Exit Sub
+cleanup:
+  PushError
+  Close f
+  PopError
+  Throw
+End Sub
+
+Public Function getSelectedPreset(Optional ByVal index As Long = -2) As String
+If index = -2 Then index = cmbPreset.ListIndex
+If index = -1 Then getSelectedPreset = "": Exit Function
+Debug.Assert ArrLen(pm.filesInCombo) = cmbPreset.ListCount
+getSelectedPreset = pm.filesInCombo(cmbPreset.ItemData(index))
+End Function
+
+'only selects; no file is opened
+Public Function SelectPreset(presetFilePath As String) As Long
+Dim idx As Long
+idx = Me.FindInCombo(presetFilePath)
+If Len(presetFilePath) > 0 And idx = -1 Then
+  'preset isn't in the list, add it...
+  Me.addPresetToList presetFilePath
+  idx = Me.FindInCombo(presetFilePath)
+  Debug.Assert idx <> -1
+End If
+Dim keeper As clsBlokada: Set keeper = pm.block.block
+cmbPreset.ListIndex = idx
+keeper.Unblock
+End Function
+
+Public Function addPresetToList(presetFilePath As String, Optional ByVal checkIfExists As Boolean = False) As Long
+If checkIfExists Then
+  If Me.FindInCombo(presetFilePath) <> -1 Then
+    'already in list!
+    Exit Function
+  End If
+End If
+If ArrLen(pm.filesInCombo) = 0 Then ReDim pm.filesInCombo(0 To 0) Else ReDim Preserve pm.filesInCombo(0 To UBound(pm.filesInCombo) + 1)
+Dim i As Long: i = UBound(pm.filesInCombo)
+pm.filesInCombo(i) = presetFilePath
+cmbPreset.AddItem mdlFiles.getFileTitle(pm.filesInCombo(i))
+cmbPreset.ItemData(cmbPreset.NewIndex) = i
+End Function
