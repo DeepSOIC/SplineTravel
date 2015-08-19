@@ -15,6 +15,7 @@ Module=Vector3D; Vector3D.bas
 Class=StringAccumulator; StringAccumulator.cls
 Module=mdlFiles; mdlFiles.bas
 Class=clsBlokada; clsBlokada.cls
+Module=mdlWorker; mdlWorker.bas
 IconForm="mainForm"
 Startup="mainForm"
 HelpFile=""
