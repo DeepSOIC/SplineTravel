@@ -952,7 +952,7 @@ eh:
     answ = MsgError(Style:=vbAbortRetryIgnore)
   Else
     answ = vbIgnore
-    Debug.Print Err.source, Err.Description
+    Debug.Print Err.Source, Err.Description
   End If
   
   If answ = vbIgnore Then
