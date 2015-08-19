@@ -41,5 +41,13 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# VB6-specific
 *.vbw
+*.obj
+
+# Spline-travel specific
 testing_gcode/*
+presets/*.ini
+# will add overrides later for specific allowed sample presets
+# !presets/PrintBox3D-fastest.ini
