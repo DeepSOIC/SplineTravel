@@ -106,3 +106,8 @@ asTypVector3D.X = Me.X
 asTypVector3D.Y = Me.Y
 asTypVector3D.Z = Me.Z
 End Function
+
+Public Function repr() As String
+Attribute repr.VB_UserMemId = 0
+repr = "(" + Str(X) + ", " + Str(Y) + ", " + Str(Z) + ")"
+End Function
