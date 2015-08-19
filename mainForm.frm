@@ -2,18 +2,27 @@ VERSION 5.00
 Begin VB.Form mainForm 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "SplineTravel"
-   ClientHeight    =   5620
+   ClientHeight    =   5460
    ClientLeft      =   30
    ClientTop       =   370
    ClientWidth     =   13540
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   ScaleHeight     =   5620
+   ScaleHeight     =   5460
    ScaleWidth      =   13540
    StartUpPosition =   3  'Windows Default
+   Begin VB.TextBox txtNotes 
+      Height          =   700
+      Left            =   7310
+      MultiLine       =   -1  'True
+      ScrollBars      =   2  'Vertical
+      TabIndex        =   40
+      Top             =   140
+      Width           =   4400
+   End
    Begin VB.Frame Frame3 
       Caption         =   "      seam concealment"
-      Height          =   3010
+      Height          =   2330
       Left            =   7690
       TabIndex        =   32
       Top             =   880
@@ -246,9 +255,11 @@ Begin VB.Form mainForm
       End
    End
    Begin VB.CommandButton cmdResetSettings 
+      BackColor       =   &H0080C0FF&
       Caption         =   "reset to defaults"
       Height          =   430
       Left            =   11850
+      Style           =   1  'Graphical
       TabIndex        =   9
       Top             =   330
       Width           =   1600
@@ -259,11 +270,13 @@ Begin VB.Form mainForm
       Left            =   20
       TabIndex        =   5
       Top             =   40
-      Width           =   8180
+      Width           =   6450
       Begin VB.CommandButton cmdDelete 
+         BackColor       =   &H008080FF&
          Caption         =   "Delete"
          Height          =   390
          Left            =   5520
+         Style           =   1  'Graphical
          TabIndex        =   8
          Top             =   250
          Width           =   720
@@ -279,53 +292,66 @@ Begin VB.Form mainForm
          Width           =   4110
       End
       Begin VB.CommandButton cmdSaveAs 
+         BackColor       =   &H0080FFFF&
          Caption         =   "Save as..."
          Height          =   340
          Left            =   4320
+         Style           =   1  'Graphical
          TabIndex        =   6
          Top             =   270
          Width           =   1060
       End
    End
    Begin VB.CommandButton cmdProcessFile 
+      BackColor       =   &H0080FF80&
       Caption         =   "Go"
       CausesValidation=   0   'False
       Height          =   840
-      Left            =   7920
+      Left            =   7930
+      Style           =   1  'Graphical
       TabIndex        =   4
-      Top             =   4440
+      Top             =   4470
       Width           =   5150
    End
    Begin VB.TextBox txtFNOut 
       Height          =   410
-      Left            =   1530
+      Left            =   1540
       TabIndex        =   3
       Tag             =   "!f"
-      Top             =   4900
+      Top             =   4930
       Width           =   5590
    End
    Begin VB.TextBox txtFNIn 
       Height          =   360
-      Left            =   1520
+      Left            =   1530
       TabIndex        =   0
       Tag             =   "!f"
-      Top             =   4470
+      Top             =   4500
       Width           =   5610
+   End
+   Begin VB.Label Label21 
+      Alignment       =   1  'Right Justify
+      Caption         =   "notes"
+      Height          =   230
+      Left            =   6270
+      TabIndex        =   39
+      Top             =   330
+      Width           =   940
    End
    Begin VB.Label Label2 
       Caption         =   "output"
       Height          =   380
-      Left            =   340
+      Left            =   350
       TabIndex        =   2
-      Top             =   4930
+      Top             =   4960
       Width           =   1090
    End
    Begin VB.Label Label1 
       Caption         =   "input"
       Height          =   270
-      Left            =   330
+      Left            =   340
       TabIndex        =   1
-      Top             =   4490
+      Top             =   4520
       Width           =   1020
    End
 End
