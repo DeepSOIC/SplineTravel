@@ -73,25 +73,25 @@ Dim arg As typLetVal
 arg = arguments(Asc("X"))
 If arg.specified Then
   If stateBefore.MoveRelative Then
-    stateAfter.pos.X = stateAfter.pos.X + arg.Value
+    stateAfter.Pos.X = stateAfter.Pos.X + arg.Value
   Else
-    stateAfter.pos.X = arg.Value
+    stateAfter.Pos.X = arg.Value
   End If
 End If
 arg = arguments(Asc("Y"))
 If arg.specified Then
   If stateBefore.MoveRelative Then
-    stateAfter.pos.Y = stateAfter.pos.Y + arg.Value
+    stateAfter.Pos.Y = stateAfter.Pos.Y + arg.Value
   Else
-    stateAfter.pos.Y = arg.Value
+    stateAfter.Pos.Y = arg.Value
   End If
 End If
 arg = arguments(Asc("Z"))
 If arg.specified Then
   If stateBefore.MoveRelative Then
-    stateAfter.pos.Z = stateAfter.pos.Z + arg.Value
+    stateAfter.Pos.Z = stateAfter.Pos.Z + arg.Value
   Else
-    stateAfter.pos.Z = arg.Value
+    stateAfter.Pos.Z = arg.Value
   End If
 End If
 
@@ -130,13 +130,13 @@ Select Case myCmdType
       stateAfter.Epos = arguments(Asc("E")).Value
     End If
     If arguments(Asc("X")).specified Then
-      stateAfter.pos.X = arguments(Asc("X")).Value
+      stateAfter.Pos.X = arguments(Asc("X")).Value
     End If
     If arguments(Asc("Y")).specified Then
-      stateAfter.pos.Y = arguments(Asc("Y")).Value
+      stateAfter.Pos.Y = arguments(Asc("Y")).Value
     End If
     If arguments(Asc("Z")).specified Then
-      stateAfter.pos.Z = arguments(Asc("Z")).Value
+      stateAfter.Pos.Z = arguments(Asc("Z")).Value
     End If
 End Select
 End Sub
@@ -166,8 +166,8 @@ End Property
 Public Function getEnterSpeed() As clsVector3D
 'FIXME: support arcs
 Set getEnterSpeed = _
-  makeClsVector(stateAfter.pos) _
-  .Subtrd(makeClsVector(stateBefore.pos)) _
+  makeClsVector(stateAfter.Pos) _
+  .Subtrd(makeClsVector(stateBefore.Pos)) _
   .Normalized.Multed(stateAfter.Speed)
 End Function
 
@@ -186,15 +186,15 @@ On Error GoTo eh
   lineText = strLine
   
   'get rid of comment
-  Dim pos As Long
-  pos = InStr(lineText, ";")
-  If pos > 0 Then
-    lineText = Trim$(Left$(lineText, pos - 1))
+  Dim Pos As Long
+  Pos = InStr(lineText, ";")
+  If Pos > 0 Then
+    lineText = Trim$(Left$(lineText, Pos - 1))
   End If
   'get rid of checksum
-  pos = InStrRev(lineText, "*")
-  If pos > 0 Then
-    lineText = Trim$(Left$(lineText, pos - 1))
+  Pos = InStrRev(lineText, "*")
+  If Pos > 0 Then
+    lineText = Trim$(Left$(lineText, Pos - 1))
   End If
   
   If Len(lineText) = 0 Then Exit Sub
@@ -257,8 +257,8 @@ End If
 If myMove Is Nothing Then
   Set myMove = New clsGMove
 End If
-myMove.p1.copyFromT stateBefore.pos
-myMove.p2.copyFromT stateAfter.pos
+myMove.p1.copyFromT stateBefore.Pos
+myMove.p2.copyFromT stateAfter.Pos
 myMove.Extrusion = stateAfter.Epos - stateBefore.Epos
 
 If myMove.traveldist > 1E-100 Then
@@ -332,7 +332,7 @@ If Not isMove Then
   Exit Property
 End If
 Dim traveldist As Double
-traveldist = Vector3D.Dist(stateBefore.pos, stateAfter.pos)
+traveldist = Vector3D.Dist(stateBefore.Pos, stateAfter.Pos)
 If traveldist < 1E-100 Then
   isTravelMove = False
   Exit Function
@@ -350,7 +350,7 @@ If Not isMove Then
   Exit Property
 End If
 Dim traveldist As Double
-traveldist = Vector3D.Dist(stateBefore.pos, stateAfter.pos)
+traveldist = Vector3D.Dist(stateBefore.Pos, stateAfter.Pos)
 If traveldist > 1E-100 Then
   isExtruderMove = False
   Exit Property
@@ -383,7 +383,7 @@ If Not isMove Then
   Exit Property
 End If
 Dim traveldist As Double
-traveldist = Vector3D.Dist(stateBefore.pos, stateAfter.pos)
+traveldist = Vector3D.Dist(stateBefore.Pos, stateAfter.Pos)
 If traveldist < 1E-100 Then
   isBuildMove = False
   Exit Property
@@ -400,11 +400,11 @@ Echange = stateAfter.Epos - stateBefore.Epos
 End Property
 
 Public Property Get PosChange() As clsVector3D
-Set PosChange = makeClsVector(stateAfter.pos).Subtrd(makeClsVector(stateBefore.pos))
+Set PosChange = makeClsVector(stateAfter.Pos).Subtrd(makeClsVector(stateBefore.Pos))
 End Property
 
 Public Property Get ZChange() As Double
-ZChange = stateAfter.pos.Z - stateBefore.pos.Z
+ZChange = stateAfter.Pos.Z - stateBefore.Pos.Z
 End Property
 
 'how much time it takes to execute the command?
