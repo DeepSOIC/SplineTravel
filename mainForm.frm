@@ -569,7 +569,7 @@ Dim presetName As String
 presetName = getFileTitle(pm.curPresetFN)
 Dim newPresetName As String
 again:
-newPresetName = InputBox("Name the preset. Entering a new name will keep current preset intact.", presetName)
+newPresetName = InputBox("Name the preset. Entering a new name will keep current preset intact.", Default:=presetName)
 If Len(newPresetName) = 0 Then Exit Sub
 verifyPresetName newPresetName
 Dim newPresetFilename As String
