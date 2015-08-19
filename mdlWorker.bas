@@ -138,7 +138,7 @@ If cfg.chkSeamConceal.Value = vbChecked Then
   Dim retractTime As Double
   retractTime = val(cfg.txtRetract) / val(cfg.txtEJerk)
   Dim retractSpeed As Double
-  retractSpeed = val(cfg.txtEJerk)
+  retractSpeed = val(cfg.txtSCRetractSpeed)
   
   For iGroup = 0 To nMoveGroups - 1
     If moveGroups(iGroup).chType = ectBuildChain Then
