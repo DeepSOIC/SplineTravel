@@ -27,8 +27,8 @@ Public ZHopHeight As Double 'may be smaller than this value, this is simply the 
 Public Retract As Double
 Public bRetract As Boolean, bUnretract As Boolean
 Public RetractJerk As Double
-Public RetractAccelleration As Double
-Public accelleration As Double
+Public RetractAcceleration As Double
+Public acceleration As Double
 
 
 Public Function FitBezier(ByRef moveTimeResult As Double) As clsBezier
@@ -54,12 +54,12 @@ outSpeed_hop.Z = outSpeed_hop.Z - Me.ZJerk
 
 'currently, the bezier is obtained by a fitting iterative procedure:
 'starting from an abrubt curve, it is smoothed out until the maximum
-'accelleration is below me.accelleration. I think, it is possible to
+'acceleration is below me.acceleration. I think, it is possible to
 'calculate everything analytically and speed up this process, but
 'this is a todo.
 
 Dim stopDist As Double 'the path length required to stop moving, we are going to use it for computing starting values
-stopDist = Me.accelleration * (spd / Me.accelleration) ^ 2 / 2#
+stopDist = Me.acceleration * (spd / Me.acceleration) ^ 2 / 2#
 
 bz.Pole(0) = Me.p1.asTypVector3D
 bz.Pole(3) = Me.p2.asTypVector3D
@@ -85,14 +85,14 @@ For i = 1 To iterCount
 '  Debug.Assert (vin.Subtrd(Me.inSpeed_hop).Length < spd * 0.00000000001)
 '  Debug.Assert (vout.Subtrd(Me.outSpeed_hop).Length < spd * 0.00000000001)
   
-  'calculate max accelleration; test if this spline is smooth enough already
+  'calculate max acceleration; test if this spline is smooth enough already
   Dim acc1 As clsVector3D
   Dim acc2 As clsVector3D
   Set acc1 = Vector3D.makeClsVector(bz.getDeriv2(0))
   Set acc2 = Vector3D.makeClsVector(bz.getDeriv2(0))
   acc1.Mult 1 / time ^ 2
   acc2.Mult 1 / time ^ 2
-  If maxD(acc1.Length, acc2.Length) <= Me.accelleration Then
+  If maxD(acc1.Length, acc2.Length) <= Me.acceleration Then
     'valid spline. roll back and try again with finer stepping
     timeOfSolved = time
     time = time * Exp(-logFactor)
@@ -121,7 +121,7 @@ If Me.CurveJerk <= 1E-100 Then Throw errClassNotInitialized, extraMessage:="Curv
 'generate retract
 Dim rtr As New clsRetractCurve
 rtr.RetractLen = Me.Retract
-rtr.RetractA = Me.RetractAccelleration
+rtr.RetractA = Me.RetractAcceleration
 rtr.MoveTime = TimeOfMove
 rtr.bRetract = Me.bRetract
 rtr.bUnretract = Me.bUnretract

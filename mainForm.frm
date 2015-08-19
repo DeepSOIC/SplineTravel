@@ -2,34 +2,326 @@ VERSION 5.00
 Begin VB.Form mainForm 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "SplineTravel"
-   ClientHeight    =   5460
+   ClientHeight    =   8180
    ClientLeft      =   30
    ClientTop       =   370
-   ClientWidth     =   11730
+   ClientWidth     =   11990
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
-   ScaleHeight     =   5460
-   ScaleWidth      =   11730
+   ScaleHeight     =   8180
+   ScaleWidth      =   11990
    StartUpPosition =   3  'Windows Default
+   Begin VB.Frame Frame5 
+      Caption         =   "Travel moves and retraction"
+      Height          =   5750
+      Left            =   50
+      TabIndex        =   21
+      Top             =   900
+      Width           =   7800
+      Begin VB.TextBox txtRetract 
+         Height          =   370
+         Left            =   5270
+         TabIndex        =   45
+         Text            =   "1.5"
+         Top             =   270
+         Width           =   1450
+      End
+      Begin VB.OptionButton optTravelStraight 
+         BackColor       =   &H0080FFFF&
+         Caption         =   "Straight travel"
+         Height          =   300
+         Left            =   270
+         Style           =   1  'Graphical
+         TabIndex        =   44
+         Top             =   4210
+         Width           =   3210
+      End
+      Begin VB.OptionButton optTravelSpline 
+         BackColor       =   &H0080FFFF&
+         Caption         =   "Spline travel"
+         Height          =   300
+         Left            =   280
+         Style           =   1  'Graphical
+         TabIndex        =   43
+         Top             =   660
+         Value           =   -1  'True
+         Width           =   3210
+      End
+      Begin VB.Frame Frame4 
+         Height          =   1380
+         Left            =   180
+         TabIndex        =   42
+         Top             =   4220
+         Width           =   7480
+         Begin VB.TextBox txtZHop 
+            Height          =   370
+            Left            =   1160
+            TabIndex        =   54
+            Text            =   "1"
+            Top             =   860
+            Width           =   1450
+         End
+         Begin VB.TextBox txtRSpeedStraight 
+            Height          =   370
+            Left            =   5040
+            TabIndex        =   51
+            Text            =   "300"
+            Top             =   370
+            Width           =   1450
+         End
+         Begin VB.TextBox txtSpeedStraight 
+            Height          =   370
+            Left            =   1160
+            TabIndex        =   48
+            Text            =   "200"
+            Top             =   390
+            Width           =   1450
+         End
+         Begin VB.Label Label31 
+            Caption         =   "mm"
+            Height          =   240
+            Left            =   2710
+            TabIndex        =   56
+            Top             =   930
+            Width           =   920
+         End
+         Begin VB.Label Label30 
+            Caption         =   "Z-hop"
+            Height          =   340
+            Left            =   160
+            TabIndex        =   55
+            Top             =   920
+            Width           =   1210
+         End
+         Begin VB.Label Label29 
+            Caption         =   "mm/s"
+            Height          =   240
+            Left            =   6540
+            TabIndex        =   53
+            Top             =   440
+            Width           =   630
+         End
+         Begin VB.Label Label28 
+            Caption         =   "retract speed"
+            Height          =   340
+            Left            =   3940
+            TabIndex        =   52
+            Top             =   430
+            Width           =   1020
+         End
+         Begin VB.Label Label27 
+            Caption         =   "mm/s"
+            Height          =   240
+            Left            =   2710
+            TabIndex        =   50
+            Top             =   460
+            Width           =   920
+         End
+         Begin VB.Label Label26 
+            Caption         =   "speed"
+            Height          =   340
+            Left            =   160
+            TabIndex        =   49
+            Top             =   450
+            Width           =   1210
+         End
+      End
+      Begin VB.Frame Frame2 
+         Height          =   3500
+         Left            =   180
+         TabIndex        =   22
+         Top             =   700
+         Width           =   7460
+         Begin VB.TextBox txtEAccel 
+            Height          =   370
+            Left            =   5070
+            TabIndex        =   28
+            Text            =   "1000"
+            Top             =   1580
+            Width           =   1450
+         End
+         Begin VB.TextBox txtEJerk 
+            Height          =   370
+            Left            =   5080
+            TabIndex        =   27
+            Text            =   "8"
+            Top             =   2220
+            Width           =   1450
+         End
+         Begin VB.TextBox txtZJerk 
+            Height          =   370
+            Left            =   1120
+            TabIndex        =   26
+            Text            =   "0"
+            Top             =   2860
+            Width           =   1450
+         End
+         Begin VB.TextBox txtSpeedLimit 
+            Height          =   370
+            Left            =   1120
+            TabIndex        =   25
+            Text            =   "200"
+            Top             =   990
+            Width           =   1450
+         End
+         Begin VB.TextBox txtCurveJerk 
+            Height          =   370
+            Left            =   1120
+            TabIndex        =   24
+            Text            =   "2"
+            Top             =   2200
+            Width           =   1450
+         End
+         Begin VB.TextBox txtAcceleration 
+            Height          =   370
+            Left            =   1120
+            TabIndex        =   23
+            Text            =   "800"
+            Top             =   1610
+            Width           =   1450
+         End
+         Begin VB.Label Label16 
+            Caption         =   "E acceleration"
+            Height          =   610
+            Left            =   3890
+            TabIndex        =   41
+            Top             =   1610
+            Width           =   1070
+         End
+         Begin VB.Label Label15 
+            Caption         =   "mm/s2"
+            Height          =   240
+            Left            =   6620
+            TabIndex        =   40
+            Top             =   1650
+            Width           =   760
+         End
+         Begin VB.Label Label12 
+            Caption         =   "E jerk (for retraction)"
+            Height          =   610
+            Left            =   3910
+            TabIndex        =   39
+            Top             =   2180
+            Width           =   1070
+         End
+         Begin VB.Label Label11 
+            Caption         =   "mm/s"
+            Height          =   240
+            Left            =   6630
+            TabIndex        =   38
+            Top             =   2290
+            Width           =   760
+         End
+         Begin VB.Label Label10 
+            Caption         =   "Z jerk (for hopping)"
+            Height          =   610
+            Left            =   70
+            TabIndex        =   37
+            Top             =   2870
+            Width           =   1070
+         End
+         Begin VB.Label Label9 
+            Caption         =   "mm/s"
+            Height          =   240
+            Left            =   2670
+            TabIndex        =   36
+            Top             =   2930
+            Width           =   760
+         End
+         Begin VB.Label label8 
+            Caption         =   "mm/s"
+            Height          =   240
+            Left            =   2670
+            TabIndex        =   35
+            Top             =   1060
+            Width           =   920
+         End
+         Begin VB.Label Label7 
+            Caption         =   "speed limit"
+            Height          =   340
+            Left            =   120
+            TabIndex        =   34
+            Top             =   1050
+            Width           =   1210
+         End
+         Begin VB.Label Label6 
+            Caption         =   "mm/s"
+            Height          =   240
+            Left            =   2670
+            TabIndex        =   33
+            Top             =   2270
+            Width           =   760
+         End
+         Begin VB.Label Label5 
+            Caption         =   "curve tesellation (jerk)"
+            Height          =   610
+            Left            =   50
+            TabIndex        =   32
+            Top             =   2060
+            Width           =   1070
+         End
+         Begin VB.Label Label4 
+            Caption         =   "mm/s2"
+            Height          =   240
+            Left            =   2670
+            TabIndex        =   31
+            Top             =   1680
+            Width           =   920
+         End
+         Begin VB.Label Label3 
+            Caption         =   "acceleration"
+            Height          =   340
+            Left            =   30
+            TabIndex        =   30
+            Top             =   1630
+            Width           =   1210
+         End
+         Begin VB.Label Label20 
+            Caption         =   $"mainForm.frx":0000
+            Height          =   700
+            Left            =   170
+            TabIndex        =   29
+            Top             =   300
+            Width           =   7060
+            WordWrap        =   -1  'True
+         End
+      End
+      Begin VB.Label Label14 
+         Caption         =   "retract"
+         Height          =   610
+         Left            =   4170
+         TabIndex        =   47
+         Top             =   310
+         Width           =   1070
+      End
+      Begin VB.Label Label13 
+         Caption         =   "mm"
+         Height          =   240
+         Left            =   6820
+         TabIndex        =   46
+         Top             =   340
+         Width           =   760
+      End
+   End
    Begin VB.TextBox txtNotes 
       Height          =   700
       Left            =   7310
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
-      TabIndex        =   39
+      TabIndex        =   16
       Top             =   140
       Width           =   4220
    End
    Begin VB.Frame Frame3 
-      Height          =   2330
-      Left            =   7720
-      TabIndex        =   31
-      Top             =   1010
+      Height          =   2460
+      Left            =   8040
+      TabIndex        =   9
+      Top             =   1000
       Width           =   3830
-      Begin VB.TextBox txtSCRetractSpeed 
+      Begin VB.TextBox txtRSpeedSC 
          Height          =   370
          Left            =   1280
-         TabIndex        =   40
+         TabIndex        =   17
          Text            =   "8"
          Top             =   1780
          Width           =   1450
@@ -37,7 +329,7 @@ Begin VB.Form mainForm
       Begin VB.TextBox txtLoopTol 
          Height          =   370
          Left            =   1330
-         TabIndex        =   33
+         TabIndex        =   11
          Text            =   "0.3"
          Top             =   1250
          Width           =   1450
@@ -45,35 +337,35 @@ Begin VB.Form mainForm
       Begin VB.CheckBox chkSeamConceal 
          BackColor       =   &H00FF80FF&
          Caption         =   "seam concealment"
-         Height          =   360
+         Height          =   310
          Left            =   120
          Style           =   1  'Graphical
-         TabIndex        =   32
+         TabIndex        =   10
          Top             =   0
          Value           =   1  'Checked
          Width           =   1790
       End
       Begin VB.Label Label23 
-         Caption         =   "speed of retraction"
-         Height          =   470
-         Left            =   240
-         TabIndex        =   42
-         Top             =   1710
+         Caption         =   "speed of concealed retraction"
+         Height          =   570
+         Left            =   230
+         TabIndex        =   19
+         Top             =   1650
          Width           =   1070
       End
       Begin VB.Label Label22 
          Caption         =   "mm/s"
          Height          =   240
          Left            =   2850
-         TabIndex        =   41
+         TabIndex        =   18
          Top             =   1850
          Width           =   760
       End
       Begin VB.Label Label19 
-         Caption         =   $"mainForm.frx":0000
+         Caption         =   $"mainForm.frx":00D0
          Height          =   630
          Left            =   110
-         TabIndex        =   36
+         TabIndex        =   14
          Top             =   350
          Width           =   3600
          WordWrap        =   -1  'True
@@ -82,7 +374,7 @@ Begin VB.Form mainForm
          Caption         =   "mm"
          Height          =   240
          Left            =   2900
-         TabIndex        =   35
+         TabIndex        =   13
          Top             =   1320
          Width           =   760
       End
@@ -90,193 +382,8 @@ Begin VB.Form mainForm
          Caption         =   "loop detection tolerance"
          Height          =   610
          Left            =   230
-         TabIndex        =   34
-         Top             =   1200
-         Width           =   1070
-      End
-   End
-   Begin VB.Frame Frame2 
-      Caption         =   "Smooth out travel moves"
-      Height          =   3500
-      Left            =   80
-      TabIndex        =   9
-      Top             =   890
-      Width           =   7460
-      Begin VB.TextBox txtAccelleration 
-         Height          =   370
-         Left            =   1120
-         TabIndex        =   16
-         Text            =   "800"
-         Top             =   1610
-         Width           =   1450
-      End
-      Begin VB.TextBox txtCurveJerk 
-         Height          =   370
-         Left            =   1120
-         TabIndex        =   15
-         Text            =   "2"
-         Top             =   2200
-         Width           =   1450
-      End
-      Begin VB.TextBox txtSpeedLimit 
-         Height          =   370
-         Left            =   1120
-         TabIndex        =   14
-         Text            =   "200"
-         Top             =   990
-         Width           =   1450
-      End
-      Begin VB.TextBox txtZJerk 
-         Height          =   370
-         Left            =   1120
-         TabIndex        =   13
-         Text            =   "0"
-         Top             =   2860
-         Width           =   1450
-      End
-      Begin VB.TextBox txtEJerk 
-         Height          =   370
-         Left            =   5080
          TabIndex        =   12
-         Text            =   "8"
-         Top             =   2220
-         Width           =   1450
-      End
-      Begin VB.TextBox txtRetract 
-         Height          =   370
-         Left            =   5090
-         TabIndex        =   11
-         Text            =   "1.5"
-         Top             =   930
-         Width           =   1450
-      End
-      Begin VB.TextBox txtEAccell 
-         Height          =   370
-         Left            =   5070
-         TabIndex        =   10
-         Text            =   "1000"
-         Top             =   1580
-         Width           =   1450
-      End
-      Begin VB.Label Label20 
-         Caption         =   $"mainForm.frx":008B
-         Height          =   700
-         Left            =   170
-         TabIndex        =   37
-         Top             =   300
-         Width           =   7060
-         WordWrap        =   -1  'True
-      End
-      Begin VB.Label Label3 
-         Caption         =   "accelleration"
-         Height          =   340
-         Left            =   30
-         TabIndex        =   30
-         Top             =   1630
-         Width           =   1210
-      End
-      Begin VB.Label Label4 
-         Caption         =   "mm/s2"
-         Height          =   240
-         Left            =   2670
-         TabIndex        =   29
-         Top             =   1680
-         Width           =   920
-      End
-      Begin VB.Label Label5 
-         Caption         =   "curve tesellation (jerk)"
-         Height          =   610
-         Left            =   50
-         TabIndex        =   28
-         Top             =   2060
-         Width           =   1070
-      End
-      Begin VB.Label Label6 
-         Caption         =   "mm/s"
-         Height          =   240
-         Left            =   2670
-         TabIndex        =   27
-         Top             =   2270
-         Width           =   760
-      End
-      Begin VB.Label Label7 
-         Caption         =   "speed limit"
-         Height          =   340
-         Left            =   120
-         TabIndex        =   26
-         Top             =   1050
-         Width           =   1210
-      End
-      Begin VB.Label label8 
-         Caption         =   "mm/s"
-         Height          =   240
-         Left            =   2670
-         TabIndex        =   25
-         Top             =   1060
-         Width           =   920
-      End
-      Begin VB.Label Label9 
-         Caption         =   "mm/s"
-         Height          =   240
-         Left            =   2670
-         TabIndex        =   24
-         Top             =   2930
-         Width           =   760
-      End
-      Begin VB.Label Label10 
-         Caption         =   "Z jerk (for hopping)"
-         Height          =   610
-         Left            =   70
-         TabIndex        =   23
-         Top             =   2870
-         Width           =   1070
-      End
-      Begin VB.Label Label11 
-         Caption         =   "mm/s"
-         Height          =   240
-         Left            =   6630
-         TabIndex        =   22
-         Top             =   2290
-         Width           =   760
-      End
-      Begin VB.Label Label12 
-         Caption         =   "E jerk (for retraction)"
-         Height          =   610
-         Left            =   3910
-         TabIndex        =   21
-         Top             =   2180
-         Width           =   1070
-      End
-      Begin VB.Label Label13 
-         Caption         =   "mm"
-         Height          =   240
-         Left            =   6640
-         TabIndex        =   20
-         Top             =   1000
-         Width           =   760
-      End
-      Begin VB.Label Label14 
-         Caption         =   "retract"
-         Height          =   610
-         Left            =   3990
-         TabIndex        =   19
-         Top             =   970
-         Width           =   1070
-      End
-      Begin VB.Label Label15 
-         Caption         =   "mm/s2"
-         Height          =   240
-         Left            =   6620
-         TabIndex        =   18
-         Top             =   1650
-         Width           =   760
-      End
-      Begin VB.Label Label16 
-         Caption         =   "E accelleration"
-         Height          =   610
-         Left            =   3890
-         TabIndex        =   17
-         Top             =   1610
+         Top             =   1200
          Width           =   1070
       End
    End
@@ -293,7 +400,7 @@ Begin VB.Form mainForm
          Height          =   280
          Left            =   5890
          Style           =   1  'Graphical
-         TabIndex        =   43
+         TabIndex        =   20
          ToolTipText     =   "load defaults"
          Top             =   390
          Visible         =   0   'False
@@ -320,7 +427,6 @@ Begin VB.Form mainForm
          Width           =   4110
       End
       Begin VB.CommandButton cmdSaveAs 
-         BackColor       =   &H0080FFFF&
          Caption         =   "Save as..."
          Height          =   280
          Left            =   4330
@@ -335,51 +441,51 @@ Begin VB.Form mainForm
       Caption         =   "Go"
       CausesValidation=   0   'False
       Height          =   840
-      Left            =   7930
+      Left            =   8380
       Style           =   1  'Graphical
       TabIndex        =   4
-      Top             =   4470
-      Width           =   3630
+      Top             =   7000
+      Width           =   3520
    End
    Begin VB.TextBox txtFNOut 
       Height          =   410
-      Left            =   1540
+      Left            =   1500
       TabIndex        =   3
       Tag             =   "!f"
-      Top             =   4930
-      Width           =   5590
+      Top             =   7470
+      Width           =   6750
    End
    Begin VB.TextBox txtFNIn 
-      Height          =   360
-      Left            =   1530
+      Height          =   410
+      Left            =   1500
       TabIndex        =   0
       Tag             =   "!f"
-      Top             =   4500
-      Width           =   5610
+      Top             =   6990
+      Width           =   6730
    End
    Begin VB.Label Label21 
       Alignment       =   1  'Right Justify
       Caption         =   "notes"
       Height          =   230
       Left            =   6270
-      TabIndex        =   38
+      TabIndex        =   15
       Top             =   330
       Width           =   940
    End
    Begin VB.Label Label2 
       Caption         =   "output"
       Height          =   380
-      Left            =   350
+      Left            =   490
       TabIndex        =   2
-      Top             =   4960
+      Top             =   7500
       Width           =   1090
    End
    Begin VB.Label Label1 
       Caption         =   "input"
       Height          =   270
-      Left            =   340
+      Left            =   490
       TabIndex        =   1
-      Top             =   4520
+      Top             =   7000
       Width           =   1020
    End
 End
@@ -548,11 +654,15 @@ For Each ctr In Me
   If TypeOf ctr Is TextBox Then
     Dim txt As TextBox
     Set txt = ctr
-    strLine = txt.Name + ".Text" + " = " + EscapeString(txt.Text)
+    strLine = ctr.Name + ".Text" + " = " + EscapeString(txt.Text)
   ElseIf TypeOf ctr Is CheckBox Then
     Dim chk As CheckBox
     Set chk = ctr
-    strLine = chk.Name + ".Value" + " = " + Trim(Str(chk.Value))
+    strLine = ctr.Name + ".Value" + " = " + Trim(Str(chk.Value))
+  ElseIf TypeOf ctr Is OptionButton Then
+    Dim opt As OptionButton
+    Set opt = ctr
+    strLine = ctr.Name + ".Value" + " = " + CStr(opt.Value)
   End If
   
   If Len(strLine) > 0 Then
@@ -762,7 +872,15 @@ End If
 
 End Sub
 
-Private Sub txtAccelleration_Change()
+Private Sub optTravelSpline_Click()
+ChangeWasMade
+End Sub
+
+Private Sub optTravelStraight_Click()
+ChangeWasMade
+End Sub
+
+Private Sub txtAcceleration_Change()
 ChangeWasMade
 End Sub
 
@@ -770,7 +888,7 @@ Private Sub txtCurveJerk_Change()
 ChangeWasMade
 End Sub
 
-Private Sub txtEAccell_Change()
+Private Sub txtEAccel_Change()
 ChangeWasMade
 End Sub
 
@@ -786,7 +904,23 @@ Private Sub txtRetract_Change()
 ChangeWasMade
 End Sub
 
+Private Sub txtRSpeedSC_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtRSpeedStraight_Change()
+ChangeWasMade
+End Sub
+
 Private Sub txtSpeedLimit_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtSpeedStraight_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtZHop_Change()
 ChangeWasMade
 End Sub
 

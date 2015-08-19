@@ -17,17 +17,17 @@ Private Type typThis
   MoveTime As Double 'time of the whole travel move
   RetractLenSetting As Double 'amount to retract (setting)
   RetractLen As Double 'actual possible retract length
-  RetractASetting As Double 'accelleration - wanted
-  RetractA As Double 'accelleration - actual (can be increased in some cases)
+  RetractASetting As Double 'acceleration - wanted
+  RetractA As Double 'acceleration - actual (can be increased in some cases)
   
   bRetract As Boolean 'set to false to suppress retraction, but keep unretraction
   bUnretract As Boolean 'set to false to suppress unretraction, but keep retraction
   
   DerivJerk As Double 'defines tessellation; in E units (speed not by time, but by parameter)
 
-  dt_acc As Double 'time it takes to accellerate to full retraction speed
+  dt_acc As Double 'time it takes to accelerate to full retraction speed
   t_start1 As Double '=zero
-  t_mid1 As Double 'moment of time when retract accelleration ends
+  t_mid1 As Double 'moment of time when retract acceleration ends
   t_end1 As Double 'moment of time when deceleration ends
   t_start2 As Double
   t_mid2 As Double
@@ -82,7 +82,7 @@ If this.bRetract And this.bUnretract Then
   End If
 ElseIf this.bRetract Or this.bUnretract Then
   If this.dt_acc * 2 > this.MoveTime Then
-    this.dt_acc = MoveTime / 2 'not enough time to complete, increase accelleration.
+    this.dt_acc = MoveTime / 2 'not enough time to complete, increase acceleration.
     this.RetractA = (this.RetractLenSetting / 2) / (this.MoveTime / 2) ^ 2
     this.RetractLen = this.RetractLenSetting
   Else

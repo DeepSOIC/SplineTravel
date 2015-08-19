@@ -86,8 +86,8 @@ If Not Me.isPause Then
   End If
   
   If time > 0 Then
-    If Abs(Me.Speed - CurrentState.Speed) > mdlPrecision.speedConfusion Then
-      outStr = outStr + " F" + vtStr(Round(Me.Speed * 60, mdlPrecision.speedDecimals))
+    If Abs(Me.FeedRate - CurrentState.Speed) > mdlPrecision.speedConfusion Then
+      outStr = outStr + " F" + vtStr(Round(Me.FeedRate * 60, mdlPrecision.speedDecimals))
     End If
   End If
   'write extrusion change
@@ -114,6 +114,18 @@ Else
 End If
 End Function
 
+Public Property Get FeedRate() As Double
+If time > 1E-100 Then
+  If Me.traveldist > 1E-100 Then
+    FeedRate = Me.traveldist / time
+  Else
+    FeedRate = Abs(Extrusion) / time
+  End If
+Else
+  Throw errZeroTimeMove, extraMessage:="can't get the speed"
+End If
+End Property
+
 Public Property Get ExtrusionSpeed() As Double
 If time > 1E-100 Then
   ExtrusionSpeed = Abs(Extrusion) / time
@@ -125,7 +137,7 @@ End Property
 'note: this will actually change time of the move, so it will change move speed too
 Public Property Let ExtrusionSpeed(ByVal newVal As Double)
 If Abs(Extrusion) Then
-  time = Extrusion / newVal
+  time = Abs(Extrusion) / newVal
 Else
   Throw errZeroTimeMove, extraMessage:="can't set the speed for zero-length extrusion"
 End If

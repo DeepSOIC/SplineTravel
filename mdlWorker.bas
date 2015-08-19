@@ -138,7 +138,7 @@ If cfg.chkSeamConceal.Value = vbChecked Then
   Dim retractTime As Double
   retractTime = val(cfg.txtRetract) / val(cfg.txtEJerk)
   Dim retractSpeed As Double
-  retractSpeed = val(cfg.txtSCRetractSpeed)
+  retractSpeed = val(cfg.txtRSpeedSC)
   
   For iGroup = 0 To nMoveGroups - 1
     If moveGroups(iGroup).chType = ectBuildChain Then
@@ -266,14 +266,19 @@ If cfg.chkSeamConceal.Value = vbChecked Then
   Next iGroup
 End If
 
+Dim bSplineTravel As Boolean: bSplineTravel = cfg.optTravelSpline.Value
+Dim bStraightTravel As Boolean: bStraightTravel = cfg.optTravelStraight.Value
+
 cfg.cmdProcessFile.Caption = "generating splines"
 DoEvents
+
+Dim retractLength As Double: retractLength = val(cfg.txtRetract)
+Dim ZHop As Double: ZHop = val(cfg.txtZHop)
 
 'replace moves with splines
 For iGroup = 0 To nMoveGroups - 1
   If moveGroups(iGroup).chType = ectTravelChain Then
     Set chain = moveGroups(iGroup).chain
-    'experimental: delete everything whatsoever between the build moves
     Dim mv As typTravelMoveRef
     Dim mvZero As typTravelMoveRef 'dummy variable used for clearing mv
     mv = mvZero
@@ -292,44 +297,136 @@ For iGroup = 0 To nMoveGroups - 1
 
     If mv.nextBuildMoveBegin Is Nothing Then GoTo continue 'fixes fail on the last travel move, where there is no nex build move
     If mv.prevBuildMoveEnd Is Nothing Then GoTo continue
-    moveGroups(iGroup).chain.delete
-    Dim gen As clsTravelGenerator
-    If gen Is Nothing Then
-      Set gen = New clsTravelGenerator
-      gen.accelleration = val(cfg.txtAccelleration)
-      gen.CurveJerk = val(cfg.txtCurveJerk)
-      gen.speedLimit = val(cfg.txtSpeedLimit)
-      gen.Retract = val(cfg.txtRetract)
-      gen.RetractAccelleration = val(cfg.txtEAccell)
-      gen.RetractJerk = val(cfg.txtEJerk)
-      gen.ZJerk = val(cfg.txtZJerk)
-    End If
-    gen.bRetract = Not moveGroups(iGroup - 1).retractInjected
-    gen.bUnretract = Not moveGroups(iGroup + 1).unretractInjected
+    If bSplineTravel Then
+      'experimental: delete everything whatsoever between the build moves. This may also accidentally consume some important commands...
+      moveGroups(iGroup).chain.delete
+      Dim gen As clsTravelGenerator
+      If gen Is Nothing Then
+        Set gen = New clsTravelGenerator
+        gen.acceleration = val(cfg.txtAcceleration)
+        gen.CurveJerk = val(cfg.txtCurveJerk)
+        gen.speedLimit = val(cfg.txtSpeedLimit)
+        gen.Retract = val(cfg.txtRetract)
+        gen.RetractAcceleration = val(cfg.txtEAccel)
+        gen.RetractJerk = val(cfg.txtEJerk)
+        gen.ZJerk = val(cfg.txtZJerk)
+      End If
+      gen.bRetract = Not moveGroups(iGroup - 1).retractInjected
+      gen.bUnretract = Not moveGroups(iGroup + 1).unretractInjected
+          
+      gen.p1.copyFromT mv.prevBuildMoveEnd.CompleteStateAfter.Pos
+      gen.p2.copyFromT mv.nextBuildMoveBegin.CompleteStateBefore.Pos
+      Set gen.inSpeed = mv.prevBuildMoveEnd.getExitSpeed
+      Set gen.outSpeed = mv.nextBuildMoveBegin.getEnterSpeed
+      Dim arrSegments() As clsGMove
+      Dim bz As clsBezier, MoveTime As Double
+      Set bz = gen.FitBezier(MoveTime)
+      gen.GenerateMoveTrainForBezier arrSegments, bz, MoveTime
+      Dim isegment As Long
+      For isegment = 0 To UBound(arrSegments)
+        Set cmd = New clsGCommand
+        chain.Add cmd
+        If isegment = 0 Then
+          'restore inter-chain connections
+          chain.MakeLink moveGroups(iGroup - 1).chain.last, chain.first
+          chain.MakeLink chain.last, moveGroups(iGroup + 1).chain.first
+        End If
+        Dim EError As Double
+        EError = 0
+        cmd.strLine = arrSegments(isegment).GenerateGCode(cmd.prevCommand.CompleteStateAfter, EError)
+        cmd.ParseString throwIfInvalid:=True
+        cmd.RecomputeStates
+      Next isegment
+    
+    ElseIf bStraightTravel Then
+    
+      'generate straight travel move
+      
+      'FIXME: keep old non-move commands
+      chain.delete
+      
+      Dim bRetract As Boolean, bUnretract As Boolean
+      bRetract = Not moveGroups(iGroup - 1).retractInjected
+      bUnretract = Not moveGroups(iGroup + 1).unretractInjected
+      If retractLength = 0 Then bRetract = False: bUnretract = False
+      If bRetract Then
+        Set cmd = New clsGCommand
+        chain.Add cmd
+        chain.MakeLink mv.prevBuildMoveEnd.inChain.last, chain.first
+        cmd.RecomputeStates
         
-    gen.p1.copyFromT mv.prevBuildMoveEnd.CompleteStateAfter.Pos
-    gen.p2.copyFromT mv.nextBuildMoveBegin.CompleteStateBefore.Pos
-    Set gen.inSpeed = mv.prevBuildMoveEnd.getExitSpeed
-    Set gen.outSpeed = mv.nextBuildMoveBegin.getEnterSpeed
-    Dim arrSegments() As clsGMove
-    Dim bz As clsBezier, MoveTime As Double
-    Set bz = gen.FitBezier(MoveTime)
-    gen.GenerateMoveTrainForBezier arrSegments, bz, MoveTime
-    Dim isegment As Long
-    For isegment = 0 To UBound(arrSegments)
+        Set move = New clsGMove
+        move.Extrusion = -retractLength
+        move.ExtrusionSpeed = val(cfg.txtRSpeedStraight)
+        move.p1.copyFromT cmd.CompleteStateBefore.Pos
+        move.p2.copyFromT cmd.CompleteStateBefore.Pos
+      
+        cmd.setMove move
+        cmd.RecomputeStates
+      End If
+      
+      If ZHop Then
+        Set cmd = New clsGCommand
+        chain.Add cmd
+        chain.MakeLink mv.prevBuildMoveEnd.inChain.last, chain.first
+        cmd.RecomputeStates
+        
+        Set move = New clsGMove
+        move.p1.copyFromT cmd.CompleteStateBefore.Pos
+        move.p2.copyFromT cmd.CompleteStateBefore.Pos
+        move.p2.Z = move.p1.Z + ZHop
+        move.Speed = val(cfg.txtSpeedStraight)
+        
+        cmd.setMove move
+        cmd.RecomputeStates
+      End If
+      
       Set cmd = New clsGCommand
       chain.Add cmd
-      If isegment = 0 Then
-        'restore inter-chain connections
-        chain.MakeLink moveGroups(iGroup - 1).chain.last, chain.first
-        chain.MakeLink chain.last, moveGroups(iGroup + 1).chain.first
-      End If
-      Dim EError As Double
-      EError = 0
-      cmd.strLine = arrSegments(isegment).GenerateGCode(cmd.prevCommand.CompleteStateAfter, EError)
-      cmd.ParseString throwIfInvalid:=True
+      chain.MakeLink mv.prevBuildMoveEnd.inChain.last, chain.first
       cmd.RecomputeStates
-    Next isegment
+      
+      Set move = New clsGMove
+      move.p1.copyFromT cmd.CompleteStateBefore.Pos
+      move.p2.copyFromT mv.nextBuildMoveBegin.CompleteStateBefore.Pos
+      move.p2.Z = move.p2.Z + ZHop
+      move.Speed = val(cfg.txtSpeedStraight)
+      
+      cmd.setMove move
+      cmd.RecomputeStates
+      
+      If ZHop Then
+        Set cmd = New clsGCommand
+        chain.Add cmd
+        cmd.RecomputeStates
+        
+        Set move = New clsGMove
+        move.p1.copyFromT cmd.CompleteStateBefore.Pos
+        move.p2.copyFromT mv.nextBuildMoveBegin.CompleteStateBefore.Pos
+        move.Speed = val(cfg.txtSpeedStraight)
+        
+        cmd.setMove move
+        cmd.RecomputeStates
+      End If
+      
+      If bUnretract Then
+        Set cmd = New clsGCommand
+        chain.Add cmd
+        cmd.RecomputeStates
+        
+        Set move = New clsGMove
+        move.Extrusion = retractLength
+        move.ExtrusionSpeed = val(cfg.txtRSpeedStraight)
+        move.p1.copyFromT cmd.CompleteStateBefore.Pos
+        move.p2.copyFromT cmd.CompleteStateBefore.Pos
+      
+        cmd.setMove move
+        cmd.RecomputeStates
+      End If
+      
+      chain.MakeLink chain.last, mv.nextBuildMoveBegin.inChain.first
+      
+    End If
     Debug.Assert chain.size > 0
     If timeToDoEvents Then
       cfg.cmdProcessFile.Caption = "generating spline " + Str(iGroup) + " of " + Str(nMoveGroups)
