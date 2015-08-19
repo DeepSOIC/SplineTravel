@@ -5,49 +5,78 @@ Begin VB.Form mainForm
    ClientHeight    =   5460
    ClientLeft      =   30
    ClientTop       =   370
-   ClientWidth     =   13540
+   ClientWidth     =   11730
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    ScaleHeight     =   5460
-   ScaleWidth      =   13540
+   ScaleWidth      =   11730
    StartUpPosition =   3  'Windows Default
    Begin VB.TextBox txtNotes 
       Height          =   700
       Left            =   7310
       MultiLine       =   -1  'True
       ScrollBars      =   2  'Vertical
-      TabIndex        =   40
+      TabIndex        =   39
       Top             =   140
-      Width           =   4400
+      Width           =   4220
    End
    Begin VB.Frame Frame3 
-      Caption         =   "      seam concealment"
       Height          =   2330
-      Left            =   7690
-      TabIndex        =   32
-      Top             =   880
+      Left            =   7720
+      TabIndex        =   31
+      Top             =   1010
       Width           =   3830
+      Begin VB.TextBox Text1 
+         Height          =   370
+         Left            =   1280
+         TabIndex        =   40
+         Text            =   "8"
+         Top             =   1780
+         Visible         =   0   'False
+         Width           =   1450
+      End
       Begin VB.TextBox txtLoopTol 
          Height          =   370
          Left            =   1330
-         TabIndex        =   34
+         TabIndex        =   33
          Text            =   "0.3"
          Top             =   1250
          Width           =   1450
       End
       Begin VB.CheckBox chkSeamConceal 
-         Height          =   370
-         Left            =   130
-         TabIndex        =   33
-         Top             =   -50
+         BackColor       =   &H00FF80FF&
+         Caption         =   "seam concealment"
+         Height          =   360
+         Left            =   120
+         Style           =   1  'Graphical
+         TabIndex        =   32
+         Top             =   0
          Value           =   1  'Checked
-         Width           =   180
+         Width           =   1790
+      End
+      Begin VB.Label Label23 
+         Caption         =   "speed of retraction"
+         Height          =   470
+         Left            =   240
+         TabIndex        =   42
+         Top             =   1710
+         Visible         =   0   'False
+         Width           =   1070
+      End
+      Begin VB.Label Label22 
+         Caption         =   "mm/s"
+         Height          =   240
+         Left            =   2850
+         TabIndex        =   41
+         Top             =   1850
+         Visible         =   0   'False
+         Width           =   760
       End
       Begin VB.Label Label19 
          Caption         =   $"mainForm.frx":0000
          Height          =   630
          Left            =   110
-         TabIndex        =   37
+         TabIndex        =   36
          Top             =   350
          Width           =   3600
          WordWrap        =   -1  'True
@@ -56,7 +85,7 @@ Begin VB.Form mainForm
          Caption         =   "mm"
          Height          =   240
          Left            =   2900
-         TabIndex        =   36
+         TabIndex        =   35
          Top             =   1320
          Width           =   760
       End
@@ -64,7 +93,7 @@ Begin VB.Form mainForm
          Caption         =   "loop detection tolerance"
          Height          =   610
          Left            =   230
-         TabIndex        =   35
+         TabIndex        =   34
          Top             =   1200
          Width           =   1070
       End
@@ -73,13 +102,13 @@ Begin VB.Form mainForm
       Caption         =   "Smooth out travel moves"
       Height          =   3500
       Left            =   80
-      TabIndex        =   10
+      TabIndex        =   9
       Top             =   890
       Width           =   7460
       Begin VB.TextBox txtAccelleration 
          Height          =   370
          Left            =   1120
-         TabIndex        =   17
+         TabIndex        =   16
          Text            =   "800"
          Top             =   1610
          Width           =   1450
@@ -87,7 +116,7 @@ Begin VB.Form mainForm
       Begin VB.TextBox txtCurveJerk 
          Height          =   370
          Left            =   1120
-         TabIndex        =   16
+         TabIndex        =   15
          Text            =   "2"
          Top             =   2200
          Width           =   1450
@@ -95,7 +124,7 @@ Begin VB.Form mainForm
       Begin VB.TextBox txtSpeedLimit 
          Height          =   370
          Left            =   1120
-         TabIndex        =   15
+         TabIndex        =   14
          Text            =   "200"
          Top             =   990
          Width           =   1450
@@ -103,7 +132,7 @@ Begin VB.Form mainForm
       Begin VB.TextBox txtZJerk 
          Height          =   370
          Left            =   1120
-         TabIndex        =   14
+         TabIndex        =   13
          Text            =   "0"
          Top             =   2860
          Width           =   1450
@@ -111,15 +140,15 @@ Begin VB.Form mainForm
       Begin VB.TextBox txtEJerk 
          Height          =   370
          Left            =   5080
-         TabIndex        =   13
-         Text            =   "15"
+         TabIndex        =   12
+         Text            =   "8"
          Top             =   2220
          Width           =   1450
       End
       Begin VB.TextBox txtRetract 
          Height          =   370
          Left            =   5090
-         TabIndex        =   12
+         TabIndex        =   11
          Text            =   "1.5"
          Top             =   930
          Width           =   1450
@@ -127,7 +156,7 @@ Begin VB.Form mainForm
       Begin VB.TextBox txtEAccell 
          Height          =   370
          Left            =   5070
-         TabIndex        =   11
+         TabIndex        =   10
          Text            =   "1000"
          Top             =   1580
          Width           =   1450
@@ -136,7 +165,7 @@ Begin VB.Form mainForm
          Caption         =   $"mainForm.frx":008B
          Height          =   700
          Left            =   170
-         TabIndex        =   38
+         TabIndex        =   37
          Top             =   300
          Width           =   7060
          WordWrap        =   -1  'True
@@ -145,7 +174,7 @@ Begin VB.Form mainForm
          Caption         =   "accelleration"
          Height          =   340
          Left            =   30
-         TabIndex        =   31
+         TabIndex        =   30
          Top             =   1630
          Width           =   1210
       End
@@ -153,7 +182,7 @@ Begin VB.Form mainForm
          Caption         =   "mm/s2"
          Height          =   240
          Left            =   2670
-         TabIndex        =   30
+         TabIndex        =   29
          Top             =   1680
          Width           =   920
       End
@@ -161,7 +190,7 @@ Begin VB.Form mainForm
          Caption         =   "curve tesellation (jerk)"
          Height          =   610
          Left            =   50
-         TabIndex        =   29
+         TabIndex        =   28
          Top             =   2060
          Width           =   1070
       End
@@ -169,7 +198,7 @@ Begin VB.Form mainForm
          Caption         =   "mm/s"
          Height          =   240
          Left            =   2670
-         TabIndex        =   28
+         TabIndex        =   27
          Top             =   2270
          Width           =   760
       End
@@ -177,7 +206,7 @@ Begin VB.Form mainForm
          Caption         =   "speed limit"
          Height          =   340
          Left            =   120
-         TabIndex        =   27
+         TabIndex        =   26
          Top             =   1050
          Width           =   1210
       End
@@ -185,7 +214,7 @@ Begin VB.Form mainForm
          Caption         =   "mm/s"
          Height          =   240
          Left            =   2670
-         TabIndex        =   26
+         TabIndex        =   25
          Top             =   1060
          Width           =   920
       End
@@ -193,7 +222,7 @@ Begin VB.Form mainForm
          Caption         =   "mm/s"
          Height          =   240
          Left            =   2670
-         TabIndex        =   25
+         TabIndex        =   24
          Top             =   2930
          Width           =   760
       End
@@ -201,7 +230,7 @@ Begin VB.Form mainForm
          Caption         =   "Z jerk (for hopping)"
          Height          =   610
          Left            =   70
-         TabIndex        =   24
+         TabIndex        =   23
          Top             =   2870
          Width           =   1070
       End
@@ -209,7 +238,7 @@ Begin VB.Form mainForm
          Caption         =   "mm/s"
          Height          =   240
          Left            =   6630
-         TabIndex        =   23
+         TabIndex        =   22
          Top             =   2290
          Width           =   760
       End
@@ -217,7 +246,7 @@ Begin VB.Form mainForm
          Caption         =   "E jerk (for retraction)"
          Height          =   610
          Left            =   3910
-         TabIndex        =   22
+         TabIndex        =   21
          Top             =   2180
          Width           =   1070
       End
@@ -225,7 +254,7 @@ Begin VB.Form mainForm
          Caption         =   "mm"
          Height          =   240
          Left            =   6640
-         TabIndex        =   21
+         TabIndex        =   20
          Top             =   1000
          Width           =   760
       End
@@ -233,7 +262,7 @@ Begin VB.Form mainForm
          Caption         =   "retract"
          Height          =   610
          Left            =   3990
-         TabIndex        =   20
+         TabIndex        =   19
          Top             =   970
          Width           =   1070
       End
@@ -241,7 +270,7 @@ Begin VB.Form mainForm
          Caption         =   "mm/s2"
          Height          =   240
          Left            =   6620
-         TabIndex        =   19
+         TabIndex        =   18
          Top             =   1650
          Width           =   760
       End
@@ -249,20 +278,10 @@ Begin VB.Form mainForm
          Caption         =   "E accelleration"
          Height          =   610
          Left            =   3890
-         TabIndex        =   18
+         TabIndex        =   17
          Top             =   1610
          Width           =   1070
       End
-   End
-   Begin VB.CommandButton cmdResetSettings 
-      BackColor       =   &H0080C0FF&
-      Caption         =   "reset to defaults"
-      Height          =   430
-      Left            =   11850
-      Style           =   1  'Graphical
-      TabIndex        =   9
-      Top             =   330
-      Width           =   1600
    End
    Begin VB.Frame Frame1 
       Caption         =   "Presets"
@@ -270,15 +289,27 @@ Begin VB.Form mainForm
       Left            =   20
       TabIndex        =   5
       Top             =   40
-      Width           =   6450
+      Width           =   6290
+      Begin VB.CommandButton cmdResetSettings 
+         BackColor       =   &H008080FF&
+         Caption         =   "*"
+         Height          =   280
+         Left            =   5890
+         Style           =   1  'Graphical
+         TabIndex        =   43
+         ToolTipText     =   "load defaults"
+         Top             =   390
+         Visible         =   0   'False
+         Width           =   340
+      End
       Begin VB.CommandButton cmdDelete 
          BackColor       =   &H008080FF&
          Caption         =   "Delete"
-         Height          =   390
-         Left            =   5520
+         Height          =   280
+         Left            =   5450
          Style           =   1  'Graphical
          TabIndex        =   8
-         Top             =   250
+         Top             =   270
          Width           =   720
       End
       Begin VB.ComboBox cmbPreset 
@@ -288,14 +319,14 @@ Begin VB.Form mainForm
          List            =   "mainForm.frx":015D
          Style           =   2  'Dropdown List
          TabIndex        =   7
-         Top             =   310
+         Top             =   270
          Width           =   4110
       End
       Begin VB.CommandButton cmdSaveAs 
          BackColor       =   &H0080FFFF&
          Caption         =   "Save as..."
-         Height          =   340
-         Left            =   4320
+         Height          =   280
+         Left            =   4330
          Style           =   1  'Graphical
          TabIndex        =   6
          Top             =   270
@@ -311,7 +342,7 @@ Begin VB.Form mainForm
       Style           =   1  'Graphical
       TabIndex        =   4
       Top             =   4470
-      Width           =   5150
+      Width           =   3630
    End
    Begin VB.TextBox txtFNOut 
       Height          =   410
@@ -334,7 +365,7 @@ Begin VB.Form mainForm
       Caption         =   "notes"
       Height          =   230
       Left            =   6270
-      TabIndex        =   39
+      TabIndex        =   38
       Top             =   330
       Width           =   940
    End
