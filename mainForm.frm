@@ -266,7 +266,6 @@ Begin VB.Form mainForm
          Left            =   5520
          TabIndex        =   8
          Top             =   250
-         Visible         =   0   'False
          Width           =   720
       End
       Begin VB.ComboBox cmbPreset 
@@ -399,6 +398,22 @@ Exit Sub
 eh:
 MsgError
 Me.SelectPreset pm.curPresetFN
+End Sub
+
+Private Sub cmdDelete_Click()
+On Error GoTo eh
+If Len(pm.curPresetFN) = 0 Then Throw errInvalidArgument, , "No preset is selected, can't delete"
+Dim answ As VbMsgBoxResult
+answ = MsgBox("You are about to delete preset " + getFileTitle(pm.curPresetFN) + ", stored in " + pm.curPresetFN + ". Continue?", vbYesNo Or vbDefaultButton2)
+If answ = vbNo Then Throw errCancel
+Kill pm.curPresetFN
+MsgBox "Preset " + getFileTitle(pm.curPresetFN) + " was deleted."
+Me.purgeModified
+pm.curPresetFN = ""
+Me.RefillPresets
+Exit Sub
+eh:
+MsgError
 End Sub
 
 Private Sub cmdProcessFile_Click()
