@@ -378,6 +378,10 @@ Private Type typPresetManagerGlobals
 End Type
 Dim pm As typPresetManagerGlobals
 
+Private Sub chkSeamConceal_Click()
+ChangeWasMade
+End Sub
+
 Private Sub cmbPreset_Click()
 If pm.block Then Exit Sub
 On Error GoTo eh
@@ -404,6 +408,7 @@ f1 = FreeFile
 Dim chain As New clsChain
 Dim iline As Long
 On Error GoTo eh
+SavePreset "(last used)"
 Open Me.txtFNIn For Input As f1
   Dim ln As String
   Do While Not EOF(f1)
@@ -814,11 +819,20 @@ Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
 If UnloadMode = QueryUnloadConstants.vbFormCode Then
   'a temporary form was created and is being destroyed, nothing special needs to be done
 Else
+  SavePreset "(since last close)"
   'explicitly terminate the application. This will prevent the app from keeping running if it is closed while processing a file
   End
 End If
 End Sub
 
+'a shortcut. It doesn't update current preset, it merely writes a new preset file
+Public Sub SavePreset(presetName As String)
+Dim newPresetFilename As String
+Dim paths() As String
+paths = mdlFiles.PresetsPaths
+newPresetFilename = paths(UBound(paths)) + presetName + ".ini"
+WritePresetFile newPresetFilename, Me.GetConfigString
+End Sub
 
 
 
@@ -947,6 +961,7 @@ End Sub
 'returns -1 if item not found
 Public Function FindInCombo(presetFilePath As String) As Long
 FindInCombo = -1
+Debug.Assert cmbPreset.ListCount = ArrLen(pm.filesInCombo)
 Dim i As Long
 For i = 0 To cmbPreset.ListCount - 1
   If StrComp(pm.filesInCombo(cmbPreset.ItemData(i)), presetFilePath, vbTextCompare) = 0 Then
@@ -965,11 +980,13 @@ End Function
 Public Sub LoadPreset(FilePath As String)
 Dim tmp As String
 tmp = ReadPresetFile(FilePath)
+Dim keeper As clsBlokada: Set keeper = pm.block.block
 Me.ResetSettings
 Me.ApplyConfigStr tmp
+Me.purgeModified
 Me.SelectPreset FilePath
 pm.curPresetFN = FilePath
-pm.curPresetIsModified = False
+keeper.Unblock
 End Sub
 
 Public Function ReadPresetFile(FilePath As String) As String
@@ -1035,3 +1052,62 @@ pm.filesInCombo(i) = presetFilePath
 cmbPreset.AddItem mdlFiles.getFileTitle(pm.filesInCombo(i))
 cmbPreset.ItemData(cmbPreset.NewIndex) = i
 End Function
+
+Public Sub ChangeWasMade()
+If pm.block Then Exit Sub
+If cmbPreset.ListIndex = -1 Then Exit Sub
+pm.curPresetIsModified = True
+Dim txt As String
+txt = cmbPreset.List(cmbPreset.ListIndex)
+If right$(txt, 1) <> "*" Then
+  txt = txt + "*"
+  cmbPreset.List(cmbPreset.ListIndex) = txt
+End If
+
+End Sub
+
+Private Sub txtAccelleration_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtCurveJerk_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtEAccell_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtEJerk_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtLoopTol_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtRetract_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtSpeedLimit_Change()
+ChangeWasMade
+End Sub
+
+Private Sub txtZJerk_Change()
+ChangeWasMade
+End Sub
+
+Public Sub purgeModified(Optional ByVal index As Long = -2)
+If index = -2 Then
+  index = Me.FindInCombo(pm.curPresetFN)
+  pm.curPresetIsModified = False
+End If
+If index = -1 Then Exit Sub
+Dim txt As String
+txt = cmbPreset.List(index)
+If right$(txt, 1) = "*" Then
+  txt = Left$(txt, Len(txt) - 1)
+  cmbPreset.List(index) = txt
+End If
+End Sub
