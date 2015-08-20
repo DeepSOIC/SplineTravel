@@ -155,7 +155,7 @@ End Function
 
 Public Function getDeriv2(ByVal t As Double) As Double
 If this.invalidated Then recompute
-Dim time As Double: time = t * this.MoveTime
+Dim time As Double: time = (t + mdlPrecision.RelConfusion) * this.MoveTime
 Dim v As Double 'output value
 If time < this.t_start1 Then
   v = 0
