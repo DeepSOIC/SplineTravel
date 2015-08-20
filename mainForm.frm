@@ -11,6 +11,15 @@ Begin VB.Form mainForm
    ScaleHeight     =   8180
    ScaleWidth      =   11990
    StartUpPosition =   3  'Windows Default
+   Begin VB.CommandButton cmdVerify 
+      Caption         =   "verify results"
+      Height          =   420
+      Left            =   8500
+      TabIndex        =   57
+      Top             =   7660
+      Visible         =   0   'False
+      Width           =   3250
+   End
    Begin VB.Frame Frame5 
       Caption         =   "Travel moves and retraction"
       Height          =   5750
@@ -611,6 +620,55 @@ For i = 1 To Len(newName)
     Throw errInvalidArgument, extraMessage:="preset name contains an invalid character " + ch
   End If
 Next i
+End Sub
+
+Private Sub cmdVerify_Click()
+  Dim mybt As CommandButton: Set mybt = cmdVerify
+  On Error GoTo eh
+  Dim stateOrig As typCurrentState, stateProcessed As typCurrentState
+  mybt.Enabled = False
+  
+  mybt.Caption = "reading original file"
+  DoEvents
+  Dim chain1 As clsChain
+  Set chain1 = mdlWorker.ReadGCodeFile(txtFNIn)
+  stateOrig = chain1.last.CompleteStateAfter
+    
+  mybt.Caption = "reading new file"
+  DoEvents
+  Dim chain2 As clsChain
+  Set chain2 = mdlWorker.ReadGCodeFile(txtFNOut)
+  stateProcessed = chain2.last.CompleteStateAfter
+  
+  mybt.Caption = "display results"
+  DoEvents
+  Dim results As New StringAccumulator
+  results.Append "original Epos: " + Str(stateOrig.Epos) + "; "
+  results.Append "processed Epos: " + Str(stateProcessed.Epos) + vbNewLine
+  MsgBox results.content
+  
+  GoSub cleanup
+  
+  mybt.Caption = "Done."
+  mybt.Enabled = True
+Exit Sub
+
+eh:
+  MsgError
+  GoSub cleanup
+  mybt.Caption = "Failed!"
+  mybt.Enabled = True
+Exit Sub
+
+cleanup:
+  mybt.Caption = "cleanup 1"
+  DoEvents
+  chain1.delete
+  
+  mybt.Caption = "cleanup 2"
+  DoEvents
+  chain2.delete
+Return
 End Sub
 
 Private Sub Form_Activate()
