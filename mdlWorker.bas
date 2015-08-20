@@ -256,8 +256,10 @@ If cfg.chkSeamConceal.Value = vbChecked Then
   Next iGroup
 End If
 
-Dim bSplineTravel As Boolean: bSplineTravel = cfg.optTravelSpline.Value
-Dim bStraightTravel As Boolean: bStraightTravel = cfg.optTravelStraight.Value
+Dim bSplineTravel As Boolean
+bSplineTravel = cfg.optTravelSpline.Value
+Dim bStraightTravel As Boolean
+bStraightTravel = cfg.optTravelStraight.Value
 
 cfg.cmdProcessFile.Caption = "generating splines"
 DoEvents
