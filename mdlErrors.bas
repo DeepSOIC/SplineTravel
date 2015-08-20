@@ -5,7 +5,7 @@ Const DisableAssertions As Boolean = True
 
 Public Type vtError
     Number As Long
-    source As String
+    Source As String
     Description As String
 End Type
 
@@ -31,8 +31,8 @@ Public Enum eErrors
   errInvalidArgument = 5
   errWrongType = 13
 End Enum
-
-Public Sub Throw(Optional er As eErrors = 0, Optional source As String, Optional extraMessage As String)
+ 
+Public Sub Throw(Optional er As eErrors = 0, Optional Source As String, Optional extraMessage As String)
 If er = 0 Then
   'analog of C++ throw, re-raise the handled error
   ErrRaise
@@ -72,13 +72,13 @@ End Select
 If Len(extraMessage) > 0 Then
   Message = Message + ", " + extraMessage
 End If
-Err.Raise er, source, Message
+Err.Raise er, Source, Message
 End Sub
 
 
 Public Sub ReadError_Arg(ByRef vErr As vtError)
 vErr.Number = Err.Number
-vErr.source = Err.source
+vErr.Source = Err.Source
 vErr.Description = Err.Description
 End Sub
 
@@ -95,13 +95,13 @@ If Len(ProjectName) = 0 Then
 End If
 Debug.Assert aErr.Number = eErrors.errCancel Or DisableAssertions
 If Len(ProcedureName) > 0 Then
-    If aErr.source = ProjectName Then
+    If aErr.Source = ProjectName Then
         Err.Raise aErr.Number, ProcedureName, aErr.Description
     Else
-        Err.Raise aErr.Number, aErr.source, aErr.Description
+        Err.Raise aErr.Number, aErr.Source, aErr.Description
     End If
 Else
-    Err.Raise aErr.Number, aErr.source, aErr.Description
+    Err.Raise aErr.Number, aErr.Source, aErr.Description
 End If
 End Sub
 
@@ -111,7 +111,7 @@ PushError
 'hack.
 On Error Resume Next
 Err.Raise 5
-ProjectName = Err.source
+ProjectName = Err.Source
 
 PopError
 End Function
@@ -184,7 +184,7 @@ Else
     Erase ErrorStack
 End If
 If Not RaiseIt Then On Error Resume Next
-Err.Raise vErr.Number, vErr.source, vErr.Description
+Err.Raise vErr.Number, vErr.Source, vErr.Description
 End Sub
 
 'puts the error into the global Err object, but doesn't raise it

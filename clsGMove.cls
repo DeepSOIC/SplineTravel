@@ -65,23 +65,23 @@ If Not Me.isPause Then
   'move
     
   'write position change
-  Dim D As clsVector3D 'move vector (relative)
-  Set D = Me.p2.Subtrd(Me.p1)
+  Dim d As clsVector3D 'move vector (relative)
+  Set d = Me.p2.Subtrd(Me.p1)
   Dim wr As clsVector3D 'coordinates to write
   If CurrentState.MoveRelative Then
-    Set wr = D
+    Set wr = d
   Else
     Set wr = Me.p2
   End If
   wr.Round
-  Set D = Me.p2.SubtrdT(CurrentState.pos) 'may differ from p1 because of rounding errors
-  If Abs(D.X) > mdlPrecision.posConfusion Then
+  Set d = Me.p2.SubtrdT(CurrentState.Pos) 'may differ from p1 because of rounding errors
+  If Abs(d.X) > mdlPrecision.posConfusion Then
     outStr = outStr + " X" + vtStr(wr.X)
   End If
-  If Abs(D.Y) > mdlPrecision.posConfusion Then
+  If Abs(d.Y) > mdlPrecision.posConfusion Then
     outStr = outStr + " Y" + vtStr(wr.Y)
   End If
-  If Abs(D.Z) > mdlPrecision.posConfusion Then
+  If Abs(d.Z) > mdlPrecision.posConfusion Then
     outStr = outStr + " Z" + vtStr(wr.Z)
   End If
   

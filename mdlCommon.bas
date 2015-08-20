@@ -7,7 +7,7 @@ Public Const Pi As Double = 3.14159265358979
 
 Public Type typCurrentState
   Speed As Double
-  pos As typVector3D
+  Pos As typVector3D
   Epos As Double 'extrusion accumulator
   MoveRelative As Boolean
   ExtrusionRelative As Boolean
@@ -40,7 +40,7 @@ For i = 0 To Len(st) - 1
     outStr.Append Mid$(st, i + 1, 1)
   End If
 Next i
-EscapeString = outStr.Content
+EscapeString = outStr.content
 End Function
 
 Public Function unEscapeString(st As String) As String
@@ -56,7 +56,7 @@ For i = 0 To Len(st) - 1
     outStr.Append ch
   End If
 Next i
-unEscapeString = outStr.Content
+unEscapeString = outStr.content
 End Function
 
 

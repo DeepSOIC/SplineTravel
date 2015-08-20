@@ -115,10 +115,10 @@ chain.unwrapMe
 autoVerify "AddChain"
 End Sub
 
-Private Sub CheckInChain(ByVal cmd As clsGCommand, source As String, extraMessage As String)
+Private Sub CheckInChain(ByVal cmd As clsGCommand, Source As String, extraMessage As String)
 If Not cmd Is Nothing Then
   If Not cmd.inChain Is Me Then
-    Throw errNotInChain, source, extraMessage
+    Throw errNotInChain, Source, extraMessage
   End If
 End If
 End Sub

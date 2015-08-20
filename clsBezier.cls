@@ -23,17 +23,17 @@ End Type
 Dim this As typThis
 
 Friend Function getPole(ByVal index As Double) As typVector3D
-If index < 0 Or index > UBound(this.Poles) Then Throw errIndexOutOfRange, source:="getPole"
+If index < 0 Or index > UBound(this.Poles) Then Throw errIndexOutOfRange, Source:="getPole"
 getPole = this.Poles(index)
 End Function
 
 Friend Property Get Pole(ByVal index As Long) As typVector3D
-If index < 0 Or index > UBound(this.Poles) Then Throw errIndexOutOfRange, source:="getPole"
+If index < 0 Or index > UBound(this.Poles) Then Throw errIndexOutOfRange, Source:="getPole"
 Pole = this.Poles(index)
 End Property
 
 Friend Property Let Pole(ByVal index As Long, newVal As typVector3D)
-If index < 0 Or index > UBound(this.Poles) Then Throw errIndexOutOfRange, source:="getPole"
+If index < 0 Or index > UBound(this.Poles) Then Throw errIndexOutOfRange, Source:="getPole"
 this.Poles(index) = newVal
 this.invalidated = True
 End Property

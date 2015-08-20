@@ -22,11 +22,11 @@ Buf = Space$(INIT_SIZE)
 nRealChars = 0
 End Sub
 
-Public Property Get Content() As String
-Content = Left$(Buf, nRealChars)
+Public Property Get content() As String
+content = Left$(Buf, nRealChars)
 End Property
 
-Public Property Let Content(ByRef NewStr As String)
+Public Property Let content(ByRef NewStr As String)
 Buf = NewStr
 nRealChars = Len(Buf)
 End Property
