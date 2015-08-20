@@ -546,7 +546,7 @@ End Sub
 Private Sub cmdProcessFile_Click()
 cmdProcessFile.Enabled = False
 On Error GoTo eh
-SavePreset "(last used)"
+SavePreset "(last used)", includeFilenames:=True
 
 mdlWorker.Process Me.txtFNIn.Text, Me.txtFNOut.Text, Me
 
@@ -585,7 +585,11 @@ Else
     End If
   End If
 End If
-WritePresetFile newPresetFilename, Me.GetConfigString
+Dim fns As Boolean: fns = False
+If Len(Me.txtFNIn) > 0 And Len(Me.txtFNOut) > 0 Then
+   fns = (vbYes = MsgBox("Include input/output file paths into preset " + newPresetName + "?", vbYesNo))
+End If
+WritePresetFile newPresetFilename, Me.GetConfigString(includeFilenames:=fns)
 pm.curPresetFN = newPresetFilename
 pm.curPresetIsModified = False
 Me.RefillPresets
@@ -628,12 +632,12 @@ End If
 End Sub
 
 'a shortcut. It doesn't update current preset, it merely writes a new preset file
-Public Sub SavePreset(presetName As String)
+Public Sub SavePreset(presetName As String, Optional ByVal includeFilenames As Boolean = False)
 Dim newPresetFilename As String
 Dim paths() As String
 paths = mdlFiles.PresetsPaths
 newPresetFilename = paths(UBound(paths)) + presetName + ".ini"
-WritePresetFile newPresetFilename, Me.GetConfigString
+WritePresetFile newPresetFilename, Me.GetConfigString(includeFilenames:=includeFilenames)
 End Sub
 
 
@@ -787,8 +791,10 @@ Public Sub LoadPreset(FilePath As String)
 Dim tmp As String
 tmp = ReadPresetFile(FilePath)
 Dim keeper As clsBlokada: Set keeper = pm.block.block
-Me.ResetSettings
-Me.ApplyConfigStr tmp
+Dim fns As Boolean
+fns = Len(Me.txtFNIn.Text) = 0 And Len(Me.txtFNOut.Text) = 0
+Me.ResetSettings includeFilenames:=fns
+Me.ApplyConfigStr tmp, includeFilenames:=fns
 Me.purgeModified
 Me.SelectPreset FilePath
 pm.curPresetFN = FilePath
