@@ -34,31 +34,21 @@ Private Type typTravelMoveRef
   'nextBuildMoveEnd As clsGCommand
 End Type
 
+Private Type typThis
+  cfg As mainForm
+End Type
+Private this As typThis
 
 
 Public Sub Process(FNIn As String, FNOut As String, cfg As mainForm)
-Dim f1 As Long
-f1 = FreeFile
-Dim chain As New clsChain
-Dim iline As Long
 On Error GoTo eh
-Open FNIn For Input As f1
-  Dim ln As String
-  Do While Not EOF(f1)
-    Line Input #(f1), ln
-    chain.Add New clsGCommand
-    chain.last.strLine = ln
-    chain.last.ParseString
-    chain.last.RecomputeStates
-    iline = iline + 1
-    If timeToDoEvents Then
-      cfg.cmdProcessFile.Caption = "reading line " + Str(iline)
-      DoEvents
-    End If
-  Loop
-Close f1
-Dim nLines As Long
-nLines = iline
+Set this.cfg = cfg
+
+'read file
+Dim chain As clsChain
+Set chain = ReadGCodeFile(FNIn)
+Dim iline As Long, nLines As Long
+nLines = chain.size
 
 cfg.cmdProcessFile.Caption = "searching for travel moves"
 DoEvents
@@ -440,6 +430,7 @@ cfg.cmdProcessFile.Caption = "writing file"
 DoEvents
 
 iline = 0
+Dim f1 As Long: f1 = FreeFile
 Open FNOut For Output As f1
   For iGroup = 0 To nMoveGroups - 1
     Set chain = moveGroups(iGroup).chain
@@ -492,3 +483,35 @@ If Abs(Timer - lastDidTime) > 0.3 Then
 End If
 End Function
 
+Public Function ReadGCodeFile(path As String) As clsChain
+Dim f1 As Long
+f1 = FreeFile
+Dim chain As New clsChain
+Dim iline As Long
+On Error GoTo cleanup
+Open path For Input As f1
+  Dim ln As String
+  Do While Not EOF(f1)
+    Line Input #(f1), ln
+    chain.Add New clsGCommand
+    chain.last.strLine = ln
+    chain.last.ParseString
+    chain.last.RecomputeStates
+    iline = iline + 1
+    If timeToDoEvents Then
+      If Not this.cfg Is Nothing Then
+        this.cfg.cmdProcessFile.Caption = "reading line " + Str(iline)
+      End If
+      DoEvents
+    End If
+  Loop
+Close f1
+Set ReadGCodeFile = chain
+Exit Function
+cleanup:
+  PushError
+  Close f1
+  chain.delete
+  PopError
+  Throw
+End Function
