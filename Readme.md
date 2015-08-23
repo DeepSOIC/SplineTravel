@@ -7,7 +7,7 @@ It processes G-code programs for 3D printing and replaces straight-line travel m
 Also, it features a seam prevention technique, similar to Slic3r's "Wipe while retracting", but more comprehensive
 
 ## How to use
-Slice your model with a slicer of your choice. Write g-code to a file. Feed this file to SplineTravel. SplineTravel will write its output g-code into another file. Use this file for printing. See more in Wiki.
+Slice your model with a slicer of your choice. Write g-code to a file. Feed this file to SplineTravel. SplineTravel will write its output g-code into another file. Use this file for printing. See more in [Wiki](https://github.com/DeepSOIC/SplineTravel/wiki).
 
 ## Installing
 There is a pre-built executable right in the repository. It is more-or-less stand-alone (provided you have VB6 runtime libraries, which are included in most versions of Windows). There is no installer, so far.
@@ -17,5 +17,6 @@ SplineTravel is written in Visual Basic 6. To use the source code, all that is n
 
 
 ## Links
+Documentation on GitHub wiki: <https://github.com/DeepSOIC/SplineTravel/wiki>   
 project page on hackaday: <https://hackaday.io/project/7045-splinetravel>    
 Slic3r, the slicer this project is mostly tested with: <http://slic3r.org/>
