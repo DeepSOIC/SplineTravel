@@ -126,7 +126,7 @@ If cfg.chkSeamConceal.Value = vbChecked Then
   Dim loopTol As Double
   loopTol = val(cfg.txtLoopTol)
   Dim retractTime As Double
-  retractTime = val(cfg.txtRetract) / val(cfg.txtEJerk)
+  retractTime = val(cfg.txtRetract) / val(cfg.txtRSpeedSC)
   Dim retractSpeed As Double
   retractSpeed = val(cfg.txtRSpeedSC)
   
