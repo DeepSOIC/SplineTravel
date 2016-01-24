@@ -12,6 +12,9 @@ Slice your model with a slicer of your choice. Write g-code to a file. Feed this
 ## Installing
 There is a pre-built executable right in the repository. It is more-or-less stand-alone (provided you have VB6 runtime libraries, which are included in most versions of Windows). There is no installer, so far.
 
+* Download SplineTravel.exe from the repository
+* in the directory you downloaded SplineTravel.exe, create a directory named "presets". This directory will be used by SplineTravel to store preset files. If the directory doesn't exist, SplineTravel will fail to do anything at all (you'll get 'Path not found' errors; to be fixed..).
+
 ## Building or running from source code
 SplineTravel is written in Visual Basic 6. To use the source code, all that is needed is a working installation of VB6 IDE. SplineTravel has no dependencies on external libraries other than VB6 runtime.
 
